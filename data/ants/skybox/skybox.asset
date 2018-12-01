@@ -10,3 +10,7 @@ skybox.obj
 []
 scheme = texture
 skybox.png
+
+[]
+scheme = object
+skybox.object
