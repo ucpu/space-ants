@@ -15,12 +15,12 @@ namespace
 		camera = entities()->createUnique();
 		{
 			ENGINE_GET_COMPONENT(transform, t, camera);
-			t.position = vec3(0, 0, 500);
+			t.position = vec3(0, 0, 100);
 			ENGINE_GET_COMPONENT(camera, c, camera);
 			c.cameraOrder = 2;
 			c.renderMask = 1;
 			c.near = 1;
-			c.far = 1000;
+			c.far = 500;
 			c.ambientLight = vec3(1, 1, 1) * 0.8;
 			c.clear = (cameraClearFlags)0;
 			ENGINE_GET_COMPONENT(listener, l, camera);
@@ -32,7 +32,7 @@ namespace
 			c.cameraOrder = 1;
 			c.renderMask = 2;
 			c.near = 0.1;
-			c.far = 10;
+			c.far = 100;
 			c.ambientLight = vec3(1, 1, 1);
 		}
 		objectSkybox = entities()->createUnique();
@@ -43,9 +43,9 @@ namespace
 			r.renderMask = 2;
 		}
 		cameraController = newCameraController(camera);
-		cameraController->freeMove = true;
+		//cameraController->freeMove = true;
 		cameraController->mouseButton = mouseButtonsFlags::Left;
-		cameraController->movementSpeed = 10;
+		cameraController->movementSpeed = 3;
 	}
 
 	void engineUpdate()

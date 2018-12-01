@@ -1,0 +1,6 @@
+[base]
+roughness = 0.7
+metalness = 0.01
+
+[textures]
+albedo = 2.png

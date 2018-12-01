@@ -18,7 +18,7 @@ lifeComponent::lifeComponent() : life(0)
 shipComponent::shipComponent() : currentTarget(0), longtermTarget(0)
 {}
 
-planetComponent::planetComponent() : production(0)
+planetComponent::planetComponent() : production(0), resources(0), batch(0)
 {}
 
 timeoutComponent::timeoutComponent() : ttl(1)

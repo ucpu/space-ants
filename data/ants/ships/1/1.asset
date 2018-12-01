@@ -1,0 +1,17 @@
+
+[]
+scheme = mesh
+1.obj
+
+[]
+scheme = texture
+albedo.png
+special.png
+
+[]
+scheme = pack
+1.pack
+
+[]
+scheme = object
+1.object

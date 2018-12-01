@@ -1,0 +1,66 @@
+
+[]
+scheme = mesh
+override_material = 0.cpm
+sphere.obj;0
+
+[]
+scheme = mesh
+override_material = 1.cpm
+sphere.obj;1
+
+[]
+scheme = mesh
+override_material = 2.cpm
+sphere.obj;2
+
+[]
+scheme = mesh
+override_material = 3.cpm
+sphere.obj;3
+
+[]
+scheme = mesh
+override_material = 4.cpm
+sphere.obj;4
+
+[]
+scheme = mesh
+override_material = 5.cpm
+sphere.obj;5
+
+[]
+scheme = mesh
+override_material = 6.cpm
+sphere.obj;6
+
+[]
+scheme = mesh
+override_material = 7.cpm
+sphere.obj;7
+
+[]
+scheme = texture
+0.png
+1.png
+2.png
+3.png
+4.png
+5.png
+6.png
+7.png
+
+[]
+scheme = pack
+farcodev.pack
+
+[]
+scheme = object
+0.object
+1.object
+2.object
+3.object
+4.object
+5.object
+6.object
+7.object
