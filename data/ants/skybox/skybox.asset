@@ -1,0 +1,12 @@
+
+[]
+scheme = pack
+skybox.pack
+
+[]
+scheme = mesh
+skybox.obj
+
+[]
+scheme = texture
+skybox.png
