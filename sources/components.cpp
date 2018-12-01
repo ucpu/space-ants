@@ -6,7 +6,7 @@
 CAGE_EVAL_SMALL(CAGE_EXPAND_ARGS(GCHL_GENERATE, COMPONENTS_LIST))
 #undef GCHL_GENERATE
 
-physicsComponent::physicsComponent()
+physicsComponent::physicsComponent() : maxSpeed(0.1)
 {}
 
 ownerComponent::ownerComponent() : owner(0)

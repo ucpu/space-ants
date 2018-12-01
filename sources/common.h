@@ -15,11 +15,10 @@ struct physicsComponent
 {
 	static componentClass *component;
 
-	quat rotation; // = angular velocity
-	quat angularAcceleration;
-	vec3 velocity; // = translational velocity
-	vec3 acceleration; // = translational acceleration
-	real radius;
+	quat rotation;
+	vec3 velocity;
+	vec3 acceleration;
+	real maxSpeed;
 
 	physicsComponent();
 };
@@ -75,5 +74,7 @@ struct timeoutComponent
 extern groupClass *entitiesToDestroy;
 
 #define GAME_GET_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
+
+uint32 pickTargetPlanet(uint32 shipOwner);
 
 #endif
