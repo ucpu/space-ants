@@ -9,7 +9,13 @@ namespace
 		for (entityClass *e : timeoutComponent::component->entities())
 		{
 			GAME_GET_COMPONENT(timeout, t, e);
-			if (t.ttl-- == 0)
+			if (t.ttl-- <= 0)
+				e->add(entitiesToDestroy);
+		}
+		for (entityClass *e : lifeComponent::component->entities())
+		{
+			GAME_GET_COMPONENT(life, l, e);
+			if (l.life <= 0)
 				e->add(entitiesToDestroy);
 		}
 		entitiesToDestroy->destroy();

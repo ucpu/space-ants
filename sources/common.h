@@ -1,6 +1,8 @@
 #ifndef ants_common_h_sdg456ds4hg6
 #define ants_common_h_sdg456ds4hg6
 
+#include <atomic>
+
 #include <cage-core/core.h>
 #include <cage-core/log.h>
 #include <cage-core/math.h>
@@ -36,7 +38,7 @@ struct lifeComponent
 {
 	static componentClass *component;
 
-	sint32 life;
+	std::atomic<sint32> life;
 
 	lifeComponent();
 };
@@ -66,7 +68,7 @@ struct timeoutComponent
 {
 	static componentClass *component;
 
-	uint32 ttl;
+	sint32 ttl;
 
 	timeoutComponent();
 };
@@ -76,5 +78,11 @@ extern groupClass *entitiesToDestroy;
 #define GAME_GET_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
 
 uint32 pickTargetPlanet(uint32 shipOwner);
+
+extern real shipSeparation;
+extern real shipSteadfast;
+extern real shipCohesion;
+extern real shipAlignment;
+extern real shipDetectRadius;
 
 #endif

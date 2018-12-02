@@ -15,7 +15,7 @@ namespace
 		camera = entities()->createUnique();
 		{
 			ENGINE_GET_COMPONENT(transform, t, camera);
-			t.position = vec3(0, 0, 100);
+			t.position = vec3(0, 0, 200);
 			ENGINE_GET_COMPONENT(camera, c, camera);
 			c.cameraOrder = 2;
 			c.renderMask = 1;

@@ -1,0 +1,11 @@
+
+[]
+scheme = mesh
+export_uv = false
+export_normal = false
+export_tangent = false
+laser.obj
+
+[]
+scheme = pack
+laser.pack

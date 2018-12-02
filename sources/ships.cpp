@@ -7,6 +7,9 @@
 #include <cage-core/random.h>
 #include <cage-core/spatial.h>
 #include <cage-core/geometry.h>
+#include <cage-core/threadPool.h>
+#include <cage-core/concurrent.h>
+#include <cage-core/hashString.h>
 
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
@@ -22,54 +25,51 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 	return 0;
 }
 
+real shipSeparation = 0.005;
+real shipSteadfast = 0.002;
+real shipCohesion = 0.005;
+real shipAlignment = 0.002;
+real shipDetectRadius = 4;
+
 namespace
 {
-	holder<spatialDataClass> data = newSpatialData(spatialDataCreateConfig());
-	holder<spatialQueryClass> query = newSpatialQuery(data.get());
+	holder<spatialDataClass> spatialData = newSpatialData(spatialDataCreateConfig());
+	holder<threadPoolClass> threads = newThreadPool("ships_");
+	holder<mutexClass> mutex = newMutex();
 
-	void engineUpdate()
+	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
 	{
+		holder<spatialQueryClass> spatialQuery = newSpatialQuery(spatialData.get());
 		entityManagerClass *ents = entities();
 
-		// add all physics objects into spatial data
-		data->clear();
-		for (entityClass *e : physicsComponent::component->entities())
-		{
-			ENGINE_GET_COMPONENT(transform, t, e);
-			data->update(e->name(), sphere(t.position, t.scale));
-		}
-		data->rebuild();
+		entityClass *const *entsArr = shipComponent::component->group()->array();
+		uint32 entsTotal = shipComponent::component->group()->count();
+		uint32 entsPerThr = entsTotal / thrCount;
+		uint32 myStart = entsPerThr * thrIndex;
+		uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
 
-		for (entityClass *e : shipComponent::component->entities())
+		std::vector<std::pair<entityClass*, entityClass*>> shots;
+		shots.reserve(myEnd - myStart);
+
+		for (uint32 entIndex = myStart; entIndex != myEnd; entIndex++)
 		{
+			entityClass *e = entsArr[entIndex];
+
 			ENGINE_GET_COMPONENT(transform, t, e);
 			GAME_GET_COMPONENT(ship, s, e);
 			GAME_GET_COMPONENT(owner, owner, e);
 			GAME_GET_COMPONENT(physics, phys, e);
 
-			if (ents->has(s.currentTarget))
-			{
-				// accelerate towards target
-				ENGINE_GET_COMPONENT(transform, target, ents->get(s.currentTarget));
-				vec3 f = target.position - t.position;
-				if (f.squaredLength() > 1e-7)
-					phys.acceleration += f.normalize() * 0.002;
-			}
-			else
-			{
-				// update target
-				if (!ents->has(s.longtermTarget))
-					s.longtermTarget = pickTargetPlanet(owner.owner);
-				s.currentTarget = s.longtermTarget;
-			}
-
 			// find all nearby objects
-			query->intersection(sphere(t.position, t.scale + 5));
+			spatialQuery->intersection(sphere(t.position, t.scale + shipDetectRadius));
 			uint32 myName = e->name();
 			vec3 avgPos;
 			vec3 avgDir;
 			uint32 avgCnt = 0;
-			for (uint32 nearbyName : query->result())
+			uint32 closestTargetName = 0;
+			real closestTargetDistance = real::PositiveInfinity;
+			bool currentTargetInVicinity = false;
+			for (uint32 nearbyName : spatialQuery->result())
 			{
 				if (nearbyName == myName)
 					continue;
@@ -77,36 +77,132 @@ namespace
 				ENGINE_GET_COMPONENT(transform, nt, n);
 				vec3 d = nt.position - t.position;
 				real l = d.length();
-				vec3 dn = d / l;
-				phys.acceleration -= dn / sqr(max(l - t.scale - nt.scale, 0)) * 0.02; // separation
-				if (n->has(ownerComponent::component) && n->has(shipComponent::component))
+				if (l > 1e-7)
+				{
+					vec3 dn = d / l;
+					phys.acceleration -= dn / sqr(max(l - t.scale - nt.scale, 1e-7)) * shipSeparation; // separation
+				}
+				if (n->has(ownerComponent::component))
 				{
 					GAME_GET_COMPONENT(owner, no, n);
 					if (no.owner == owner.owner)
 					{
-						// same owner
-						GAME_GET_COMPONENT(physics, np, n);
-						avgPos += nt.position;
-						if (np.velocity.squaredLength() > 1e-7)
-							avgDir += np.velocity.normalize();
-						avgCnt++;
+						// friend
+						if (n->has(shipComponent::component))
+						{
+							GAME_GET_COMPONENT(physics, np, n);
+							avgPos += nt.position;
+							if (np.velocity.squaredLength() > 1e-10)
+								avgDir += np.velocity.normalize();
+							avgCnt++;
+						}
+					}
+					else
+					{
+						// enemy
+						if (nearbyName == s.currentTarget)
+							currentTargetInVicinity = true;
+						else
+						{
+							if (l < closestTargetDistance)
+							{
+								closestTargetDistance = l;
+								closestTargetName = nearbyName;
+							}
+						}
 					}
 				}
 			}
 			if (avgCnt > 0)
 			{
-				avgPos /= avgCnt;
-				phys.acceleration += (avgPos - t.position).normalize() * 0.005; // cohesion
-				if (avgDir.squaredLength() > 1e-7)
-					phys.acceleration += avgDir.normalize() * 0.002; // alignment
+				avgPos = avgPos / avgCnt - t.position;
+				if (avgPos.squaredLength() > 1e-10)
+					phys.acceleration += avgPos.normalize() * shipCohesion; // cohesion
+				if (avgDir.squaredLength() > 1e-10)
+					phys.acceleration += avgDir.normalize() * shipAlignment; // alignment
 			}
+
+			// update target
+			if (!currentTargetInVicinity && closestTargetName)
+				s.currentTarget = closestTargetName;
+			else
+			{
+				// use long-term target
+				if (!ents->has(s.longtermTarget))
+					s.longtermTarget = pickTargetPlanet(owner.owner);
+				s.currentTarget = s.longtermTarget;
+			}
+
+			if (ents->has(s.currentTarget))
+			{
+				entityClass *target = ents->get(s.currentTarget);
+				// accelerate towards target
+				ENGINE_GET_COMPONENT(transform, targetTransform, target);
+				vec3 f = targetTransform.position - t.position;
+				real l = f.length() - t.scale - targetTransform.scale;
+				if (l > 1e-7)
+					phys.acceleration += f.normalize() * shipSteadfast;
+				if (l < shipDetectRadius)
+				{
+					// fire at the target
+					CAGE_ASSERT_RUNTIME(target->has(lifeComponent::component));
+					GAME_GET_COMPONENT(life, targetLife, target);
+					targetLife.life--;
+					shots.emplace_back(e, target);
+				}
+			}
+			else
+				phys.acceleration = -phys.velocity;
 
 			{
 				// update ship orientation
-				if (phys.acceleration.squaredLength() > 1e-7)
+				if (phys.acceleration.squaredLength() > 1e-10)
 					t.orientation = quat(phys.acceleration.normalize(), t.orientation * vec3(0, 1, 0));
 			}
+
+			CAGE_ASSERT_RUNTIME(phys.acceleration.valid() && phys.velocity.valid(), phys.acceleration, phys.velocity, t.position);
 		}
+
+		{
+			// generate lasers
+			scopeLock<mutexClass> lock(mutex);
+			for (auto &it : shots)
+			{
+				entityClass *from = it.first;
+				entityClass *target = it.second;
+				ENGINE_GET_COMPONENT(transform, ft, from);
+				ENGINE_GET_COMPONENT(transform, tt, target);
+				entityClass *e = ents->createAnonymous();
+				ENGINE_GET_COMPONENT(transform, t, e);
+				vec3 f = tt.position - ft.position;
+				t.scale = f.length() - ft.scale - tt.scale;
+				f = f.normalize();
+				t.position = ft.position + f * ft.scale;
+				t.orientation = quat(f, vec3(0, 1, 0));
+				ENGINE_GET_COMPONENT(render, fr, from);
+				ENGINE_GET_COMPONENT(render, r, e);
+				r.object = hashString("ants/laser/laser.obj");
+				r.color = fr.color;
+				GAME_GET_COMPONENT(timeout, ttl, e);
+				ttl.ttl = 1;
+			}
+		}
+	}
+
+	void engineUpdate()
+	{
+		// add all physics objects into spatial data
+		spatialData->clear();
+		for (entityClass *e : physicsComponent::component->entities())
+		{
+			ENGINE_GET_COMPONENT(transform, t, e);
+			spatialData->update(e->name(), sphere(t.position, t.scale));
+		}
+		spatialData->rebuild();
+
+		// update ships
+		threads->function.bind<&shipsUpdateEntry>();
+		threads->run();
 	}
 
 	class callbacksInitClass

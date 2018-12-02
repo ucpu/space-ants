@@ -31,8 +31,9 @@ namespace
 		uint32 playersCount = randomRange(2u, 5u);
 		std::vector<vec3> playerColors;
 		playerColors.resize(playersCount);
+		real hueOff = randomChance();
 		for (uint32 p = 0; p < playersCount; p++)
-			playerColors[p] = convertHsvToRgb(vec3(randomChance(), randomRange(0.5, 1.0), randomRange(0.5, 1.0)));
+			playerColors[p] = convertHsvToRgb(vec3((real(p) / playersCount + hueOff) % 1, randomRange(0.5, 1.0), randomRange(0.5, 1.0)));
 		uint32 planetsCount = randomRange(3u, 12u);
 		for (uint32 p = 0; p < planetsCount; p++)
 		{
@@ -40,7 +41,7 @@ namespace
 			ENGINE_GET_COMPONENT(transform, t, e);
 			t.position = randomDirection3() * randomRange(50, 100);
 			t.orientation = randomDirectionQuat();
-			t.scale = randomRange(1.0, 5.0);
+			t.scale = randomRange(3.0, 5.0);
 			GAME_GET_COMPONENT(owner, owner, e);
 			owner.owner = p % playersCount;
 			ENGINE_GET_COMPONENT(render, r, e);
@@ -51,9 +52,9 @@ namespace
 			GAME_GET_COMPONENT(life, life, e);
 			life.life = randomRange(1000000, 2000000);
 			GAME_GET_COMPONENT(planet, planet, e);
-			planet.production = randomRange(20, 30);
-			planet.resources = randomRange(40, 60) * shipCost;
-			planet.batch = shipCost;
+			planet.production = randomRange(40, 50);
+			planet.resources = randomRange(40, 100) * shipCost;
+			planet.batch = 50 * shipCost;
 		}
 	}
 
@@ -62,7 +63,7 @@ namespace
 		entityClass *e = entities()->createUnique();
 		ENGINE_GET_COMPONENT(transform, planetTransform, planet);
 		ENGINE_GET_COMPONENT(transform, t, e);
-		t.scale = 0.1;
+		t.scale = 0.3;
 		t.position = planetTransform.position + randomDirection3() * (t.scale + planetTransform.scale + 1e-5);
 		t.orientation = randomDirectionQuat();
 		GAME_GET_COMPONENT(owner, planetOwner, planet);
