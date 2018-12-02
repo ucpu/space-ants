@@ -80,9 +80,11 @@ extern groupClass *entitiesToDestroy;
 uint32 pickTargetPlanet(uint32 shipOwner);
 
 extern real shipSeparation;
-extern real shipSteadfast;
+extern real shipTargetShips;
+extern real shipTargetPlanets;
 extern real shipCohesion;
 extern real shipAlignment;
 extern real shipDetectRadius;
+extern real shipLaserRadius;
 
 #endif

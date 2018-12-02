@@ -39,9 +39,9 @@ namespace
 		{
 			entityClass *e = entities()->createUnique();
 			ENGINE_GET_COMPONENT(transform, t, e);
-			t.position = randomDirection3() * randomRange(50, 100);
+			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
-			t.scale = randomRange(3.0, 5.0);
+			t.scale = randomRange(3.0, 7.0);
 			GAME_GET_COMPONENT(owner, owner, e);
 			owner.owner = p % playersCount;
 			ENGINE_GET_COMPONENT(render, r, e);

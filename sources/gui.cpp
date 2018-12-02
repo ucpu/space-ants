@@ -5,19 +5,23 @@
 namespace
 {
 	real *propertyValues[] = {
+		&shipTargetShips,
+		&shipTargetPlanets,
 		&shipSeparation,
-		&shipSteadfast,
 		&shipCohesion,
 		&shipAlignment,
 		&shipDetectRadius,
+		&shipLaserRadius,
 	};
 
 	const string propertyNames[] = {
+		"Target Ships: ",
+		"Target Planets: ",
 		"Separation: ",
-		"Steadfast: ",
 		"Cohesion: ",
 		"Alignment: ",
 		"Detect Radius: ",
+		"Laser Radius: ",
 	};
 
 	void engineUpdate()
@@ -78,15 +82,16 @@ namespace
 				GUI_GET_COMPONENT(input, c, con);
 				c.type = inputTypeEnum::Real;
 				c.min.f = 0;
-				c.max.f = 0.1;
-				c.step.f = 0.001;
+				c.max.f = 0.05;
+				c.step.f = 0.0002;
 				c.value = *propertyValues[i];
 			}
 		}
 
+		for (uint32 i : { 5, 6 })
 		{
-			// detection radius
-			GUI_GET_COMPONENT(input, c, g->entities()->get(20 + 4));
+			// radiuses
+			GUI_GET_COMPONENT(input, c, g->entities()->get(20 + i));
 			c.min.f = 0.1;
 			c.max.f = 10.0;
 			c.step.f = 0.1;

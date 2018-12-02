@@ -25,11 +25,13 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 	return 0;
 }
 
-real shipSeparation = 0.005;
-real shipSteadfast = 0.002;
-real shipCohesion = 0.005;
-real shipAlignment = 0.002;
-real shipDetectRadius = 4;
+real shipSeparation = 0.002;
+real shipTargetShips = 0.005;
+real shipTargetPlanets = 0.001;
+real shipCohesion = 0.003;
+real shipAlignment = 0.001;
+real shipDetectRadius = 3;
+real shipLaserRadius = 1;
 
 namespace
 {
@@ -68,7 +70,6 @@ namespace
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
 			real closestTargetDistance = real::PositiveInfinity;
-			bool currentTargetInVicinity = false;
 			for (uint32 nearbyName : spatialQuery->result())
 			{
 				if (nearbyName == myName)
@@ -100,15 +101,10 @@ namespace
 					else
 					{
 						// enemy
-						if (nearbyName == s.currentTarget)
-							currentTargetInVicinity = true;
-						else
+						if (l < closestTargetDistance)
 						{
-							if (l < closestTargetDistance)
-							{
-								closestTargetDistance = l;
-								closestTargetName = nearbyName;
-							}
+							closestTargetDistance = l;
+							closestTargetName = nearbyName;
 						}
 					}
 				}
@@ -122,27 +118,39 @@ namespace
 					phys.acceleration += avgDir.normalize() * shipAlignment; // alignment
 			}
 
-			// update target
-			if (!currentTargetInVicinity && closestTargetName)
-				s.currentTarget = closestTargetName;
+			// choose a target to follow
+			uint32 targetName = 0;
+			if (ents->has(s.currentTarget))
+				targetName = s.currentTarget;
+			else if (closestTargetName)
+				targetName = s.currentTarget = closestTargetName;
 			else
 			{
-				// use long-term target
+				// use long-term goal
 				if (!ents->has(s.longtermTarget))
 					s.longtermTarget = pickTargetPlanet(owner.owner);
-				s.currentTarget = s.longtermTarget;
+				targetName = s.longtermTarget;
 			}
 
-			if (ents->has(s.currentTarget))
+			// accelerate towards target
+			if (ents->has(targetName))
 			{
-				entityClass *target = ents->get(s.currentTarget);
-				// accelerate towards target
+				entityClass *target = ents->get(targetName);
 				ENGINE_GET_COMPONENT(transform, targetTransform, target);
 				vec3 f = targetTransform.position - t.position;
 				real l = f.length() - t.scale - targetTransform.scale;
 				if (l > 1e-7)
-					phys.acceleration += f.normalize() * shipSteadfast;
-				if (l < shipDetectRadius)
+					phys.acceleration += f.normalize() * shipTargetShips;
+			}
+
+			// fire at closest enemy
+			if (ents->has(closestTargetName))
+			{
+				entityClass *target = ents->get(closestTargetName);
+				ENGINE_GET_COMPONENT(transform, targetTransform, target);
+				vec3 f = targetTransform.position - t.position;
+				real l = f.length() - t.scale - targetTransform.scale;
+				if (l < shipLaserRadius)
 				{
 					// fire at the target
 					CAGE_ASSERT_RUNTIME(target->has(lifeComponent::component));
@@ -151,8 +159,6 @@ namespace
 					shots.emplace_back(e, target);
 				}
 			}
-			else
-				phys.acceleration = -phys.velocity;
 
 			{
 				// update ship orientation
