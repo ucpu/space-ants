@@ -1,3 +1,5 @@
+#include <initializer_list>
+
 #include "common.h"
 
 #include <cage-client/gui.h>

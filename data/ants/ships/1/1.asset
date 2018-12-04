@@ -2,7 +2,21 @@
 []
 scheme = mesh
 scale = 0.25
-1.obj
+override_material = fine.cpm
+1.obj?fine
+
+[]
+scheme = mesh
+scale = 0.25
+export_uv = false
+export_tangent = false
+override_material = coarse.cpm
+1.obj?coarse
+
+[]
+scheme = collider
+scale = 0.25
+1.obj?coarse;collider
 
 []
 scheme = texture

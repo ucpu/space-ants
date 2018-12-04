@@ -41,7 +41,7 @@ namespace
 			ENGINE_GET_COMPONENT(transform, t, e);
 			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
-			t.scale = randomRange(3.0, 7.0);
+			t.scale = 5;
 			GAME_GET_COMPONENT(owner, owner, e);
 			owner.owner = p % playersCount;
 			ENGINE_GET_COMPONENT(render, r, e);
@@ -75,7 +75,7 @@ namespace
 		r.object = hashString("ants/ships/1/1.object");
 		GAME_GET_COMPONENT(physics, physics, e);
 		GAME_GET_COMPONENT(life, life, e);
-		life.life = 20;
+		life.life = 50;
 		GAME_GET_COMPONENT(ship, ship, e);
 		ship.longtermTarget = target;
 	}
@@ -99,7 +99,7 @@ namespace
 				if (shipsCount + create > shipsLimit)
 					continue;
 				p.resources -= create * shipCost;
-				p.batch = randomRange(20, 30) * shipCost;
+				p.batch = randomRange(10, 30) * shipCost;
 				GAME_GET_COMPONENT(owner, owner, e);
 				uint32 target = pickTargetPlanet(owner.owner);
 				for (uint32 s = 0; s < create; s++)

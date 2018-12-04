@@ -1,4 +1,14 @@
 
-[]
-1.obj
+[ref]
+shadower = 1.obj?coarse
+collider = 1.obj?coarse;collider
 
+[size]
+world = 0.25
+pixels = 8
+
+[]
+1.obj?fine
+
+[]
+1.obj?coarse
