@@ -1,14 +1,84 @@
 #include "common.h"
 
 #include <cage-core/hashString.h>
+#include <cage-core/variableSmoothingBuffer.h>
 #include <cage-client/cameraController.h>
+#include <cage-client/window.h>
 
 namespace
 {
+	class autoCameraClass
+	{
+
+		variableSmoothingBufferStruct<vec3, 30> a;
+		variableSmoothingBufferStruct<vec3, 30> b;
+
+		void updatePositions()
+		{
+			if (entities()->has(shipName))
+			{
+				entityClass *ship = entities()->get(shipName);
+				ENGINE_GET_COMPONENT(transform, t, ship);
+				GAME_GET_COMPONENT(physics, p, ship);
+				a.add(t.position);
+				if (p.velocity.squaredLength() > 1e-7)
+					b.add(t.position - p.velocity.normalize() * 5);
+			}
+			else
+			{
+				uint32 cnt = shipComponent::component->group()->count();
+				uint32 i = randomRange(0u, cnt);
+				shipName = shipComponent::component->group()->array()[i]->name();
+			}
+		}
+
+	public:
+		entityClass *cam;
+		uint32 shipName;
+
+		autoCameraClass() : cam(0), shipName(0)
+		{}
+
+		void update()
+		{
+			updatePositions();
+			if (cam)
+			{
+				ENGINE_GET_COMPONENT(transform, t, cam);
+				transform t2 = t;
+				t.position = b.smooth();
+				t.orientation = quat(a.smooth() - t.position, t.orientation * vec3(0, 1, 0));
+				t = interpolate(t2, t, 0.1);
+			}
+		}
+	};
+
 	entityClass *camera;
 	entityClass *cameraSkybox;
 	entityClass *objectSkybox;
-	holder<cameraControllerClass> cameraController;
+	holder<cameraControllerClass> manualCamera;
+	autoCameraClass autoCamera;
+	eventListener<void(uint32, uint32, modifiersFlags)> keyPressListener;
+
+	void keyPress(uint32 a, uint32 b, modifiersFlags)
+	{
+		if (a == 32)
+		{
+			if (autoCamera.cam)
+			{
+				// switch to manual
+				autoCamera.cam = nullptr;
+				manualCamera->setEntity(camera);
+				autoCamera.shipName = 0;
+			}
+			else
+			{
+				// switch to auto
+				autoCamera.cam = camera;
+				manualCamera->setEntity(nullptr);
+			}
+		}
+	}
 
 	void engineInitialize()
 	{
@@ -42,10 +112,12 @@ namespace
 			r.object = hashString("ants/skybox/skybox.object");
 			r.renderMask = 2;
 		}
-		cameraController = newCameraController(camera);
-		cameraController->freeMove = true;
-		cameraController->mouseButton = mouseButtonsFlags::Left;
-		cameraController->movementSpeed = 3;
+		manualCamera = newCameraController(camera);
+		manualCamera->freeMove = true;
+		manualCamera->mouseButton = mouseButtonsFlags::Left;
+		manualCamera->movementSpeed = 3;
+		keyPressListener.attach(window()->events.keyPress);
+		keyPressListener.bind<&keyPress>();
 	}
 
 	void engineUpdate()
@@ -53,6 +125,7 @@ namespace
 		ENGINE_GET_COMPONENT(transform, tc, camera);
 		ENGINE_GET_COMPONENT(transform, ts, cameraSkybox);
 		ts.orientation = tc.orientation;
+		autoCamera.update();
 	}
 
 	class callbacksInitClass

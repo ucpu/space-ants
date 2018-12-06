@@ -175,13 +175,13 @@ namespace
 				}
 			}
 
+			CAGE_ASSERT_RUNTIME(phys.acceleration.valid() && phys.velocity.valid(), phys.acceleration, phys.velocity, t.position);
+
 			{
 				// update ship orientation
 				if (phys.acceleration.squaredLength() > 1e-10)
 					t.orientation = quat(phys.acceleration.normalize(), t.orientation * vec3(0, 1, 0));
 			}
-
-			CAGE_ASSERT_RUNTIME(phys.acceleration.valid() && phys.velocity.valid(), phys.acceleration, phys.velocity, t.position);
 		}
 
 		{
