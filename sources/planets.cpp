@@ -19,12 +19,12 @@ namespace
 	};
 
 #ifdef CAGE_DEBUG
-	const uint32 shipsLimit = 300;
+	const uint32 shipsLimit = 200;
+	const uint32 batchScale = 1;
 #else
-	const uint32 shipsLimit = 3000;
+	const uint32 shipsLimit = 5000;
+	const uint32 batchScale = 10;
 #endif // CAGE_DEBUG
-
-	const uint32 shipCost = 100;
 
 	void engineInitialize()
 	{
@@ -52,9 +52,7 @@ namespace
 			GAME_GET_COMPONENT(life, life, e);
 			life.life = randomRange(1000000, 2000000);
 			GAME_GET_COMPONENT(planet, planet, e);
-			planet.production = randomRange(40, 50);
-			planet.resources = randomRange(40, 100) * shipCost;
-			planet.batch = 50 * shipCost;
+			planet.batch = randomRange(3 * batchScale, 5 * batchScale);
 		}
 	}
 
@@ -75,7 +73,7 @@ namespace
 		r.object = hashString("ants/ships/1/1.object");
 		GAME_GET_COMPONENT(physics, physics, e);
 		GAME_GET_COMPONENT(life, life, e);
-		life.life = 50;
+		life.life = randomRange(200, 300);
 		GAME_GET_COMPONENT(ship, ship, e);
 		ship.longtermTarget = target;
 	}
@@ -86,25 +84,19 @@ namespace
 	{
 		uint32 shipsCount = shipComponent::component->group()->count();
 		uint32 planetsCount = planetComponent::component->group()->count();
+		uint32 currentIndex = 0;
 		for (entityClass *e : planetComponent::component->entities())
 		{
 			GAME_GET_COMPONENT(planet, p, e);
-			p.resources += p.production;
-			p.resources = min(p.resources, p.batch);
-			if ((e->name() % planetsCount) != (planetIndex % planetsCount))
+			if (currentIndex++ != (planetIndex % planetsCount))
 				continue;
-			if (p.resources == p.batch)
-			{
-				uint32 create = p.resources / shipCost;
-				if (shipsCount + create > shipsLimit)
-					continue;
-				p.resources -= create * shipCost;
-				p.batch = randomRange(10, 30) * shipCost;
-				GAME_GET_COMPONENT(owner, owner, e);
-				uint32 target = pickTargetPlanet(owner.owner);
-				for (uint32 s = 0; s < create; s++)
-					createShip(e, target);
-			}
+			if (shipsCount + p.batch > shipsLimit)
+				continue;
+			GAME_GET_COMPONENT(owner, owner, e);
+			uint32 target = pickTargetPlanet(owner.owner);
+			for (uint32 s = 0; s < p.batch; s++)
+				createShip(e, target);
+			p.batch = randomRange(3 * batchScale, 5 * batchScale);
 			planetIndex++;
 		}
 	}

@@ -31,11 +31,18 @@ real shipTargetPlanets = 0.001;
 real shipCohesion = 0.003;
 real shipAlignment = 0.001;
 real shipDetectRadius = 3;
-real shipLaserRadius = 1;
+real shipLaserRadius = 2;
 
 namespace
 {
-	holder<spatialDataClass> spatialData = newSpatialData(spatialDataCreateConfig());
+	holder<spatialDataClass> initSpatialData()
+	{
+		spatialDataCreateConfig cfg;
+		cfg.gridResolutionCoefficient *= 0.5;
+		return newSpatialData(cfg);
+	}
+
+	holder<spatialDataClass> spatialData = initSpatialData();
 	holder<threadPoolClass> threads = newThreadPool("ships_");
 	holder<mutexClass> mutex = newMutex();
 
@@ -61,6 +68,14 @@ namespace
 			GAME_GET_COMPONENT(ship, s, e);
 			GAME_GET_COMPONENT(owner, owner, e);
 			GAME_GET_COMPONENT(physics, phys, e);
+
+			// destroy ships that wandered too far away
+			if (t.position.squaredLength() > sqr(200))
+			{
+				GAME_GET_COMPONENT(life, life, e);
+				life.life = 0;
+				continue;
+			}
 
 			// find all nearby objects
 			spatialQuery->intersection(sphere(t.position, t.scale + shipDetectRadius));

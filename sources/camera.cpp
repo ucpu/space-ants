@@ -43,7 +43,7 @@ namespace
 			r.renderMask = 2;
 		}
 		cameraController = newCameraController(camera);
-		//cameraController->freeMove = true;
+		cameraController->freeMove = true;
 		cameraController->mouseButton = mouseButtonsFlags::Left;
 		cameraController->movementSpeed = 3;
 	}

@@ -58,10 +58,12 @@ namespace
 
 		entityClass *table = g->entities()->createUnique();
 		{
-			GUI_GET_COMPONENT(panel, c, table);
+			GUI_GET_COMPONENT(spoiler, c, table);
 			GUI_GET_COMPONENT(layoutTable, l, table);
 			GUI_GET_COMPONENT(parent, child, table);
 			child.parent = topLeft->name();
+			GUI_GET_COMPONENT(text, t, table);
+			t.value = "Ships";
 		}
 
 		CAGE_ASSERT_COMPILE(sizeof(propertyNames) / sizeof(propertyNames[0]) == sizeof(propertyValues) / sizeof(propertyValues[0]), arrays_must_have_same_length);

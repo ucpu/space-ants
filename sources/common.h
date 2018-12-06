@@ -57,9 +57,7 @@ struct planetComponent
 {
 	static componentClass *component;
 
-	uint32 production; // added resources per tick
-	uint32 resources; // current resources
-	uint32 batch; // required resources for next batch of ships
+	uint32 batch; // number of ships to spawn
 
 	planetComponent();
 };
