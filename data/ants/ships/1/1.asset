@@ -8,6 +8,12 @@ override_material = fine.cpm
 []
 scheme = mesh
 scale = 0.25
+override_material = fine.cpm
+1.obj?coarse;middle
+
+[]
+scheme = mesh
+scale = 0.25
 export_uv = false
 export_tangent = false
 override_material = coarse.cpm

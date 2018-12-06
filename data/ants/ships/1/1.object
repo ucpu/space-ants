@@ -5,10 +5,13 @@ collider = 1.obj?coarse;collider
 
 [size]
 world = 0.25
-pixels = 8
+pixels = 12
 
 []
 1.obj?fine
+
+[]
+1.obj?coarse;middle
 
 []
 1.obj?coarse
