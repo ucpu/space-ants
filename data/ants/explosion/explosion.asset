@@ -1,0 +1,16 @@
+
+[]
+scheme = mesh
+export_normal = false
+export_tangent = false
+particle.blend
+
+[]
+scheme = texture
+target = GL_TEXTURE_2D_ARRAY
+animation_loop = false
+particle/burn_$$.png
+
+[]
+scheme = pack
+explosion.pack

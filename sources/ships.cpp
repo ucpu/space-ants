@@ -216,6 +216,8 @@ namespace
 		spatialData->clear();
 		for (entityClass *e : physicsComponent::component->entities())
 		{
+			if (e->name() == 0)
+				continue;
 			ENGINE_GET_COMPONENT(transform, t, e);
 			spatialData->update(e->name(), sphere(t.position, t.scale));
 		}
