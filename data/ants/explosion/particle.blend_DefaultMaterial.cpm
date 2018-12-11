@@ -1,0 +1,14 @@
+[base]
+emissive = 1
+mask = 0.5
+
+[textures]
+albedo = particle/burn_$$.png
+
+[flags]
+no-lighting
+no-shadow-cast
+two-sided
+opacity-texture
+transparency
+
