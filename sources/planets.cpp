@@ -22,7 +22,7 @@ namespace
 	const uint32 shipsLimit = 200;
 	const uint32 batchScale = 1;
 #else
-	const uint32 shipsLimit = 5000;
+	const uint32 shipsLimit = 7000;
 	const uint32 batchScale = 10;
 #endif // CAGE_DEBUG
 

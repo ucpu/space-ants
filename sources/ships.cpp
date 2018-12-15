@@ -38,7 +38,6 @@ namespace
 	holder<spatialDataClass> initSpatialData()
 	{
 		spatialDataCreateConfig cfg;
-		cfg.gridResolutionCoefficient *= 0.5;
 		return newSpatialData(cfg);
 	}
 
@@ -236,6 +235,9 @@ namespace
 		{
 			engineUpdateListener.attach(controlThread().update, 30);
 			engineUpdateListener.bind<&engineUpdate>();
+
+			//currentRandomGenerator().s[0] = 13;
+			//currentRandomGenerator().s[1] = 42;
 		}
 	} callbacksInitInstance;
 }
