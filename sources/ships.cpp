@@ -10,6 +10,8 @@
 #include <cage-core/threadPool.h>
 #include <cage-core/concurrent.h>
 #include <cage-core/hashString.h>
+#include <cage-core/timer.h>
+#include <cage-core/variableSmoothingBuffer.h>
 
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
@@ -45,6 +47,12 @@ namespace
 	holder<threadPoolClass> threads = newThreadPool("ships_");
 	holder<mutexClass> mutex = newMutex();
 
+	uint32 tickIndex = 1;
+	holder<timerClass> timer = newTimer();
+	variableSmoothingBufferStruct<uint64, 512> smoothTimeSpatialBuild;
+	variableSmoothingBufferStruct<uint64, 512> smoothTimeShipsUpdate;
+	variableSmoothingBufferStruct<uint32, 2048> shipsInteractionRatio;
+
 	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
 	{
 		holder<spatialQueryClass> spatialQuery = newSpatialQuery(spatialData.get());
@@ -58,6 +66,8 @@ namespace
 
 		std::vector<std::pair<entityClass*, entityClass*>> shots;
 		shots.reserve(myEnd - myStart);
+
+		uint32 shipsInteracted = 0;
 
 		for (uint32 entIndex = myStart; entIndex != myEnd; entIndex++)
 		{
@@ -84,6 +94,7 @@ namespace
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
 			real closestTargetDistance = real::PositiveInfinity;
+			shipsInteracted += spatialQuery->resultCount();
 			for (uint32 nearbyName : spatialQuery->result())
 			{
 				if (nearbyName == myName)
@@ -184,8 +195,9 @@ namespace
 		}
 
 		{
-			// generate lasers
 			scopeLock<mutexClass> lock(mutex);
+
+			// generate lasers
 			for (auto &it : shots)
 			{
 				entityClass *from = it.first;
@@ -206,12 +218,20 @@ namespace
 				GAME_GET_COMPONENT(timeout, ttl, e);
 				ttl.ttl = 1;
 			}
+
+			// stats
+			{
+				uint32 cnt = myEnd - myStart;
+				if (cnt > 0)
+					shipsInteractionRatio.add(1000 * shipsInteracted / cnt);
+			}
 		}
 	}
 
 	void engineUpdate()
 	{
 		// add all physics objects into spatial data
+		timer->reset();
 		spatialData->clear();
 		for (entityClass *e : physicsComponent::component->entities())
 		{
@@ -221,10 +241,21 @@ namespace
 			spatialData->update(e->name(), sphere(t.position, t.scale));
 		}
 		spatialData->rebuild();
+		smoothTimeSpatialBuild.add(timer->microsSinceLast());
 
 		// update ships
+		timer->reset();
 		threads->function.bind<&shipsUpdateEntry>();
 		threads->run();
+		smoothTimeShipsUpdate.add(timer->microsSinceLast());
+
+		// log timing
+		if (tickIndex++ % 120 == 0)
+		{
+			CAGE_LOG(severityEnum::Info, "performance", string() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
+			CAGE_LOG(severityEnum::Info, "performance", string() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
+			CAGE_LOG(severityEnum::Info, "performance", string() + "Ships interaction ratio: " + real(shipsInteractionRatio.smooth()) * 0.001);
+		}
 	}
 
 	class callbacksInitClass
@@ -236,8 +267,8 @@ namespace
 			engineUpdateListener.attach(controlThread().update, 30);
 			engineUpdateListener.bind<&engineUpdate>();
 
-			//currentRandomGenerator().s[0] = 13;
-			//currentRandomGenerator().s[1] = 42;
+			currentRandomGenerator().s[0] = 13;
+			currentRandomGenerator().s[1] = 42;
 		}
 	} callbacksInitInstance;
 }
