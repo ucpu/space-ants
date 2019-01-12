@@ -1,5 +1,5 @@
 [base]
-emissive = 1
+emissive = 2
 mask = 0.5
 
 [textures]

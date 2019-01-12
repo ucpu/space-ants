@@ -41,6 +41,7 @@ sphere.obj;7
 
 []
 scheme = texture
+degamma_on = true
 0.png
 1.png
 2.png

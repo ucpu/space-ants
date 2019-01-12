@@ -9,6 +9,7 @@ particle.blend
 scheme = texture
 target = GL_TEXTURE_2D_ARRAY
 animation_loop = false
+degamma_on = true
 particle/burn_$$.png
 
 []

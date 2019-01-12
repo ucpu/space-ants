@@ -25,6 +25,12 @@ namespace
 			ENGINE_GET_COMPONENT(animatedTexture, at, e);
 			at.startTime = currentControlTime();
 			at.speed = randomRange(0.7, 1.5);
+			if (i == 0)
+			{
+				ENGINE_GET_COMPONENT(light, l, e);
+				l.color = (r.color + 1) * cnt;
+				l.attenuation[2] *= 0.5;
+			}
 			GAME_GET_COMPONENT(physics, p, e);
 			p.velocity = randomDirection3() * t.scale * 0.04 + sp.velocity;
 			GAME_GET_COMPONENT(timeout, ttl, e);

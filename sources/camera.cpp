@@ -93,6 +93,7 @@ namespace
 			c.far = 500;
 			c.ambientLight = vec3(1, 1, 1) * 0.8;
 			c.clear = (cameraClearFlags)0;
+			c.effects = cameraEffectsFlags::CombinedPass;
 			ENGINE_GET_COMPONENT(listener, l, camera);
 		}
 		cameraSkybox = entities()->createUnique();

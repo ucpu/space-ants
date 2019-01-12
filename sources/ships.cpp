@@ -53,6 +53,12 @@ namespace
 	variableSmoothingBufferStruct<uint64, 512> smoothTimeShipsUpdate;
 	variableSmoothingBufferStruct<uint32, 2048> shipsInteractionRatio;
 
+	struct laserStruct
+	{
+		transform tr;
+		vec3 color;
+	};
+
 	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
 	{
 		holder<spatialQueryClass> spatialQuery = newSpatialQuery(spatialData.get());
@@ -64,7 +70,7 @@ namespace
 		uint32 myStart = entsPerThr * thrIndex;
 		uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
 
-		std::vector<std::pair<entityClass*, entityClass*>> shots;
+		std::vector<laserStruct> shots;
 		shots.reserve(myEnd - myStart);
 
 		uint32 shipsInteracted = 0;
@@ -173,15 +179,22 @@ namespace
 			{
 				entityClass *target = ents->get(closestTargetName);
 				ENGINE_GET_COMPONENT(transform, targetTransform, target);
-				vec3 f = targetTransform.position - t.position;
-				real l = f.length() - t.scale - targetTransform.scale;
-				if (l < shipLaserRadius)
+				vec3 o = t.position + t.orientation * vec3(0, 0, -t.scale);
+				vec3 d = targetTransform.position - o;
+				real l = d.length();
+				if (l < shipLaserRadius + targetTransform.scale)
 				{
 					// fire at the target
 					CAGE_ASSERT_RUNTIME(target->has(lifeComponent::component));
 					GAME_GET_COMPONENT(life, targetLife, target);
 					targetLife.life--;
-					shots.emplace_back(e, target);
+					laserStruct laser;
+					laser.tr.position = o;
+					laser.tr.orientation = quat(d, vec3(0, 1, 0));
+					laser.tr.scale = l;
+					ENGINE_GET_COMPONENT(render, render, e);
+					laser.color = render.color;
+					shots.push_back(laser);
 				}
 			}
 
@@ -200,21 +213,12 @@ namespace
 			// generate lasers
 			for (auto &it : shots)
 			{
-				entityClass *from = it.first;
-				entityClass *target = it.second;
-				ENGINE_GET_COMPONENT(transform, ft, from);
-				ENGINE_GET_COMPONENT(transform, tt, target);
 				entityClass *e = ents->createAnonymous();
 				ENGINE_GET_COMPONENT(transform, t, e);
-				vec3 f = tt.position - ft.position;
-				t.scale = f.length() - ft.scale - tt.scale;
-				f = f.normalize();
-				t.position = ft.position + f * ft.scale;
-				t.orientation = quat(f, vec3(0, 1, 0));
-				ENGINE_GET_COMPONENT(render, fr, from);
+				t = it.tr;
 				ENGINE_GET_COMPONENT(render, r, e);
 				r.object = hashString("ants/laser/laser.obj");
-				r.color = fr.color;
+				r.color = it.color;
 				GAME_GET_COMPONENT(timeout, ttl, e);
 				ttl.ttl = 1;
 			}

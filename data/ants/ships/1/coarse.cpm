@@ -1,2 +1,4 @@
 [base]
 mask = 1
+roughness = 0.086
+metalness = 0.41
