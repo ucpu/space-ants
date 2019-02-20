@@ -3,6 +3,7 @@
 scheme = mesh
 export_normal = false
 export_tangent = false
+scale = 2
 particle.blend
 
 []

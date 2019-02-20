@@ -1,11 +1,23 @@
 #include "common.h"
 
 #include <cage-core/hashString.h>
+#include <cage-core/color.h>
 
 groupClass *entitiesToDestroy;
 
 namespace
 {
+	vec3 colorVariation(const vec3 &c)
+	{
+		vec3 hsv = convertRgbToHsv(c);
+		hsv[0] += randomRange(0.8, 1.2);
+		hsv[0] = hsv[0] % 1;
+		hsv[1] += randomRange(-0.2, 0.2);
+		hsv[2] += randomRange(-0.2, 0.2);
+		hsv = clamp(hsv, 0, 1);
+		return convertHsvToRgb(hsv);
+	}
+
 	void shipExplode(entityClass *ship)
 	{
 		ENGINE_GET_COMPONENT(transform, st, ship);
@@ -21,18 +33,12 @@ namespace
 			t.orientation = randomDirectionQuat();
 			ENGINE_GET_COMPONENT(render, r, e);
 			r.object = hashString("ants/explosion/particle.blend");
-			r.color = sr.color;
+			r.color = colorVariation(sr.color) * 2;
 			ENGINE_GET_COMPONENT(animatedTexture, at, e);
 			at.startTime = currentControlTime();
 			at.speed = randomRange(0.7, 1.5);
-			if (i == 0)
-			{
-				ENGINE_GET_COMPONENT(light, l, e);
-				l.color = (r.color + 1) * cnt;
-				l.attenuation[2] *= 0.5;
-			}
 			GAME_GET_COMPONENT(physics, p, e);
-			p.velocity = randomDirection3() * t.scale * 0.04 + sp.velocity;
+			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
 			GAME_GET_COMPONENT(timeout, ttl, e);
 			ttl.ttl = numeric_cast<sint32>(real(30) / at.speed);
 		}

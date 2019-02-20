@@ -91,9 +91,9 @@ namespace
 			c.renderMask = 1;
 			c.near = 1;
 			c.far = 500;
-			c.ambientLight = vec3(1, 1, 1) * 0.8;
+			c.ambientLight = vec3(0.8);
 			c.clear = (cameraClearFlags)0;
-			c.effects = cameraEffectsFlags::CombinedPass;
+			c.effects = cameraEffectsFlags::CombinedPass & ~cameraEffectsFlags::AmbientOcclusion;
 			ENGINE_GET_COMPONENT(listener, l, camera);
 		}
 		cameraSkybox = entities()->createUnique();
@@ -104,7 +104,7 @@ namespace
 			c.renderMask = 2;
 			c.near = 0.1;
 			c.far = 100;
-			c.ambientLight = vec3(1, 1, 1);
+			c.ambientLight = vec3(1);
 		}
 		objectSkybox = entities()->createUnique();
 		{

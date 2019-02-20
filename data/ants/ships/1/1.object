@@ -1,8 +1,4 @@
 
-[ref]
-shadower = 1.obj?coarse
-collider = 1.obj?coarse;collider
-
 [size]
 world = 0.25
 pixels = 12
