@@ -8,7 +8,7 @@ particle.blend
 
 []
 scheme = texture
-target = GL_TEXTURE_2D_ARRAY
+target = 2d_array
 animation_loop = false
 srgb = true
 particle/burn_$$.png

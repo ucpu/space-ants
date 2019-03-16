@@ -53,9 +53,15 @@ namespace
 	variableSmoothingBufferStruct<uint64, 512> smoothTimeShipsUpdate;
 	variableSmoothingBufferStruct<uint32, 2048> shipsInteractionRatio;
 
+	vec3 front(const transform &t)
+	{
+		return t.position + t.orientation * vec3(0, 0, -1) * t.scale;
+	}
+
 	struct laserStruct
 	{
 		transform tr;
+		transform trh;
 		vec3 color;
 	};
 
@@ -178,20 +184,27 @@ namespace
 			if (ents->has(closestTargetName))
 			{
 				entityClass *target = ents->get(closestTargetName);
-				ENGINE_GET_COMPONENT(transform, targetTransform, target);
-				vec3 o = t.position + t.orientation * vec3(0, 0, -t.scale);
-				vec3 d = targetTransform.position - o;
+				ENGINE_GET_COMPONENT(transform, tt, target);
+				vec3 o = front(t);
+				vec3 d = tt.position - o;
 				real l = d.length();
-				if (l < shipLaserRadius + targetTransform.scale)
+				if (l < shipLaserRadius + tt.scale)
 				{
 					// fire at the target
 					CAGE_ASSERT_RUNTIME(target->has(lifeComponent::component));
 					GAME_GET_COMPONENT(life, targetLife, target);
 					targetLife.life--;
+					const transform &th = e->value<transformComponent>(transformComponent::componentHistory);
+					const transform &tth = target->value<transformComponent>(transformComponent::componentHistory);
 					laserStruct laser;
 					laser.tr.position = o;
 					laser.tr.orientation = quat(d, vec3(0, 1, 0));
 					laser.tr.scale = l;
+					laser.trh.position = front(th);
+					vec3 dh = tth.position - laser.trh.position;
+					real lh = dh.length();
+					laser.trh.orientation = quat(dh, vec3(0, 1, 0));
+					laser.trh.scale = lh;
 					ENGINE_GET_COMPONENT(render, render, e);
 					laser.color = render.color;
 					shots.push_back(laser);
@@ -216,6 +229,8 @@ namespace
 				entityClass *e = ents->createAnonymous();
 				ENGINE_GET_COMPONENT(transform, t, e);
 				t = it.tr;
+				transform &th = e->value<transformComponent>(transformComponent::componentHistory);
+				th = it.trh;
 				ENGINE_GET_COMPONENT(render, r, e);
 				r.object = hashString("ants/laser/laser.obj");
 				r.color = it.color;
