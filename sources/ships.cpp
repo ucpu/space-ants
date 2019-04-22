@@ -105,7 +105,7 @@ namespace
 			vec3 avgDir;
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
-			real closestTargetDistance = real::PositiveInfinity;
+			real closestTargetDistance = real::Infinity();
 			shipsInteracted += spatialQuery->resultCount();
 			for (uint32 nearbyName : spatialQuery->result())
 			{
