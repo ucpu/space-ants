@@ -4,7 +4,7 @@
 #include <cage-core/log.h>
 #include <cage-core/math.h>
 #include <cage-core/config.h>
-#include <cage-core/assets.h>
+#include <cage-core/assetManager.h>
 #include <cage-core/ini.h>
 #include <cage-core/hashString.h>
 
@@ -30,7 +30,6 @@ int main(int argc, const char *args[])
 	try
 	{
 		holder<loggerClass> log1 = newLogger();
-		log1->filter.bind<logFilterPolicyPass>();
 		log1->format.bind<logFormatPolicyConsole>();
 		log1->output.bind<logOutputPolicyStdOut>();
 

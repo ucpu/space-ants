@@ -10,8 +10,8 @@ namespace
 	class autoCameraClass
 	{
 
-		variableSmoothingBufferStruct<vec3, 30> a;
-		variableSmoothingBufferStruct<vec3, 30> b;
+		variableSmoothingBuffer<vec3, 30> a;
+		variableSmoothingBuffer<vec3, 30> b;
 
 		void updatePositions()
 		{

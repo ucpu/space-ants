@@ -49,9 +49,9 @@ namespace
 
 	uint32 tickIndex = 1;
 	holder<timerClass> timer = newTimer();
-	variableSmoothingBufferStruct<uint64, 512> smoothTimeSpatialBuild;
-	variableSmoothingBufferStruct<uint64, 512> smoothTimeShipsUpdate;
-	variableSmoothingBufferStruct<uint32, 2048> shipsInteractionRatio;
+	variableSmoothingBuffer<uint64, 512> smoothTimeSpatialBuild;
+	variableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
+	variableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
 
 	vec3 front(const transform &t)
 	{
