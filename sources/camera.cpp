@@ -91,10 +91,13 @@ namespace
 			c.renderMask = 1;
 			c.near = 1;
 			c.far = 500;
-			c.ambientLight = vec3(0.8);
+			c.ambientLight = vec3(0.1);
 			c.clear = (cameraClearFlags)0;
 			c.effects = cameraEffectsFlags::CombinedPass & ~cameraEffectsFlags::AmbientOcclusion;
-			ENGINE_GET_COMPONENT(listener, l, camera);
+			ENGINE_GET_COMPONENT(listener, ls, camera);
+			ENGINE_GET_COMPONENT(light, l, camera);
+			l.lightType = lightTypeEnum::Directional;
+			l.color = vec3(1);
 		}
 		cameraSkybox = entities()->createUnique();
 		{
