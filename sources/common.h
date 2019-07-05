@@ -15,7 +15,7 @@ using namespace cage;
 
 struct physicsComponent
 {
-	static componentClass *component;
+	static entityComponent *component;
 
 	quat rotation;
 	vec3 velocity;
@@ -27,7 +27,7 @@ struct physicsComponent
 
 struct ownerComponent
 {
-	static componentClass *component;
+	static entityComponent *component;
 
 	uint32 owner;
 
@@ -36,7 +36,7 @@ struct ownerComponent
 
 struct lifeComponent
 {
-	static componentClass *component;
+	static entityComponent *component;
 
 	std::atomic<sint32> life;
 
@@ -45,7 +45,7 @@ struct lifeComponent
 
 struct shipComponent
 {
-	static componentClass *component;
+	static entityComponent *component;
 
 	uint32 currentTarget;
 	uint32 longtermTarget;
@@ -55,7 +55,7 @@ struct shipComponent
 
 struct planetComponent
 {
-	static componentClass *component;
+	static entityComponent *component;
 
 	uint32 batch; // number of ships to spawn
 
@@ -64,14 +64,14 @@ struct planetComponent
 
 struct timeoutComponent
 {
-	static componentClass *component;
+	static entityComponent *component;
 
 	sint32 ttl;
 
 	timeoutComponent();
 };
 
-extern groupClass *entitiesToDestroy;
+extern entityGroup *entitiesToDestroy;
 
 #define GAME_GET_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
 

@@ -3,7 +3,7 @@
 #include <cage-core/hashString.h>
 #include <cage-core/color.h>
 
-groupClass *entitiesToDestroy;
+entityGroup *entitiesToDestroy;
 
 namespace
 {
@@ -18,23 +18,23 @@ namespace
 		return convertHsvToRgb(hsv);
 	}
 
-	void shipExplode(entityClass *ship)
+	void shipExplode(entity *ship)
 	{
-		ENGINE_GET_COMPONENT(transform, st, ship);
-		ENGINE_GET_COMPONENT(render, sr, ship);
+		CAGE_COMPONENT_ENGINE(transform, st, ship);
+		CAGE_COMPONENT_ENGINE(render, sr, ship);
 		GAME_GET_COMPONENT(physics, sp, ship);
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
-			entityClass *e = entities()->createAnonymous();
-			ENGINE_GET_COMPONENT(transform, t, e);
+			entity *e = entities()->createAnonymous();
+			CAGE_COMPONENT_ENGINE(transform, t, e);
 			t.scale = st.scale;
 			t.position = st.position + randomDirection3() * st.scale;
 			t.orientation = randomDirectionQuat();
-			ENGINE_GET_COMPONENT(render, r, e);
+			CAGE_COMPONENT_ENGINE(render, r, e);
 			r.object = hashString("ants/explosion/particle.blend");
 			r.color = colorVariation(sr.color) * 2;
-			ENGINE_GET_COMPONENT(animatedTexture, at, e);
+			CAGE_COMPONENT_ENGINE(textureAnimation, at, e);
 			at.startTime = currentControlTime();
 			at.speed = randomRange(0.7, 1.5);
 			GAME_GET_COMPONENT(physics, p, e);
@@ -46,13 +46,13 @@ namespace
 
 	void engineUpdate()
 	{
-		for (entityClass *e : timeoutComponent::component->entities())
+		for (entity *e : timeoutComponent::component->entities())
 		{
 			GAME_GET_COMPONENT(timeout, t, e);
 			if (t.ttl-- <= 0)
 				e->add(entitiesToDestroy);
 		}
-		for (entityClass *e : lifeComponent::component->entities())
+		for (entity *e : lifeComponent::component->entities())
 		{
 			GAME_GET_COMPONENT(life, l, e);
 			if (l.life <= 0)

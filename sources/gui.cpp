@@ -38,8 +38,8 @@ namespace
 		uint32 index = name - 20;
 		if (index < sizeof(propertyValues) / sizeof(propertyValues[0]))
 		{
-			entityClass *e = gui()->entities()->get(name);
-			GUI_GET_COMPONENT(input, input, e);
+			entity *e = gui()->entities()->get(name);
+			CAGE_COMPONENT_GUI(input, input, e);
 			if (input.valid)
 				*propertyValues[index] = input.value.toFloat();
 		}
@@ -47,43 +47,43 @@ namespace
 
 	void engineInitialize()
 	{
-		guiClass *g = cage::gui();
+		guiManager *g = cage::gui();
 		guiListener.attach(g->widgetEvent);
 		guiListener.bind<&guiEvent>();
 
-		entityClass *topLeft = g->entities()->createUnique();
+		entity *topLeft = g->entities()->createUnique();
 		{
-			GUI_GET_COMPONENT(scrollbars, sc, topLeft);
+			CAGE_COMPONENT_GUI(scrollbars, sc, topLeft);
 		}
 
-		entityClass *table = g->entities()->createUnique();
+		entity *table = g->entities()->createUnique();
 		{
-			GUI_GET_COMPONENT(spoiler, c, table);
-			GUI_GET_COMPONENT(layoutTable, l, table);
-			GUI_GET_COMPONENT(parent, child, table);
+			CAGE_COMPONENT_GUI(spoiler, c, table);
+			CAGE_COMPONENT_GUI(layoutTable, l, table);
+			CAGE_COMPONENT_GUI(parent, child, table);
 			child.parent = topLeft->name();
-			GUI_GET_COMPONENT(text, t, table);
+			CAGE_COMPONENT_GUI(text, t, table);
 			t.value = "Ships";
 		}
 
 		CAGE_ASSERT_COMPILE(sizeof(propertyNames) / sizeof(propertyNames[0]) == sizeof(propertyValues) / sizeof(propertyValues[0]), arrays_must_have_same_length);
 		for (uint32 i = 0; i < sizeof(propertyNames) / sizeof(propertyNames[0]); i++)
 		{
-			entityClass *lab = g->entities()->createUnique();
+			entity *lab = g->entities()->createUnique();
 			{
-				GUI_GET_COMPONENT(parent, child, lab);
+				CAGE_COMPONENT_GUI(parent, child, lab);
 				child.parent = table->name();
 				child.order = i * 2 + 0;
-				GUI_GET_COMPONENT(label, c, lab);
-				GUI_GET_COMPONENT(text, t, lab);
+				CAGE_COMPONENT_GUI(label, c, lab);
+				CAGE_COMPONENT_GUI(text, t, lab);
 				t.value = propertyNames[i];
 			}
-			entityClass *con = g->entities()->create(20 + i);
+			entity *con = g->entities()->create(20 + i);
 			{
-				GUI_GET_COMPONENT(parent, child, con);
+				CAGE_COMPONENT_GUI(parent, child, con);
 				child.parent = table->name();
 				child.order = i * 2 + 1;
-				GUI_GET_COMPONENT(input, c, con);
+				CAGE_COMPONENT_GUI(input, c, con);
 				c.type = inputTypeEnum::Real;
 				c.min.f = 0;
 				c.max.f = 0.05;
@@ -95,7 +95,7 @@ namespace
 		for (uint32 i : { 5, 6 })
 		{
 			// radiuses
-			GUI_GET_COMPONENT(input, c, g->entities()->get(20 + i));
+			CAGE_COMPONENT_GUI(input, c, g->entities()->get(20 + i));
 			c.min.f = 0.1;
 			c.max.f = 10.0;
 			c.step.f = 0.1;

@@ -2,7 +2,7 @@
 
 #define COMPONENTS_LIST physicsComponent, ownerComponent, lifeComponent, shipComponent, planetComponent, timeoutComponent
 
-#define GCHL_GENERATE(N) componentClass *N::component;
+#define GCHL_GENERATE(N) entityComponent *N::component;
 CAGE_EVAL_SMALL(CAGE_EXPAND_ARGS(GCHL_GENERATE, COMPONENTS_LIST))
 #undef GCHL_GENERATE
 

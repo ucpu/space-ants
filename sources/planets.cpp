@@ -37,14 +37,14 @@ namespace
 		uint32 planetsCount = randomRange(3u, 12u);
 		for (uint32 p = 0; p < planetsCount; p++)
 		{
-			entityClass *e = entities()->createUnique();
-			ENGINE_GET_COMPONENT(transform, t, e);
+			entity *e = entities()->createUnique();
+			CAGE_COMPONENT_ENGINE(transform, t, e);
 			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
 			t.scale = 5;
 			GAME_GET_COMPONENT(owner, owner, e);
 			owner.owner = p % playersCount;
-			ENGINE_GET_COMPONENT(render, r, e);
+			CAGE_COMPONENT_ENGINE(render, r, e);
 			r.object = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
 			r.color = playerColors[owner.owner];
 			GAME_GET_COMPONENT(physics, physics, e);
@@ -56,19 +56,19 @@ namespace
 		}
 	}
 
-	void createShip(entityClass *planet, uint32 target)
+	void createShip(entity *planet, uint32 target)
 	{
-		entityClass *e = entities()->createUnique();
-		ENGINE_GET_COMPONENT(transform, planetTransform, planet);
-		ENGINE_GET_COMPONENT(transform, t, e);
+		entity *e = entities()->createUnique();
+		CAGE_COMPONENT_ENGINE(transform, planetTransform, planet);
+		CAGE_COMPONENT_ENGINE(transform, t, e);
 		t.scale = 0.3;
 		t.position = planetTransform.position + randomDirection3() * (t.scale + planetTransform.scale + 1e-5);
 		t.orientation = randomDirectionQuat();
 		GAME_GET_COMPONENT(owner, planetOwner, planet);
 		GAME_GET_COMPONENT(owner, owner, e);
 		owner.owner = planetOwner.owner;
-		ENGINE_GET_COMPONENT(render, planetRender, planet);
-		ENGINE_GET_COMPONENT(render, r, e);
+		CAGE_COMPONENT_ENGINE(render, planetRender, planet);
+		CAGE_COMPONENT_ENGINE(render, r, e);
 		r.color = planetRender.color;
 		r.object = hashString("ants/ships/1/1.object");
 		GAME_GET_COMPONENT(physics, physics, e);
@@ -85,7 +85,7 @@ namespace
 		uint32 shipsCount = shipComponent::component->group()->count();
 		uint32 planetsCount = planetComponent::component->group()->count();
 		uint32 currentIndex = 0;
-		for (entityClass *e : planetComponent::component->entities())
+		for (entity *e : planetComponent::component->entities())
 		{
 			GAME_GET_COMPONENT(planet, p, e);
 			if (currentIndex++ != (planetIndex % planetsCount))

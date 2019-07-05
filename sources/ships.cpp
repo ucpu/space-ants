@@ -16,9 +16,9 @@
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
 	auto range = planetComponent::component->entities();
-	std::vector<entityClass*> planets(range.begin(), range.end());
+	std::vector<entity*> planets(range.begin(), range.end());
 	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)currentRandomGenerator().next()));
-	for (entityClass *e : planets)
+	for (entity *e : planets)
 	{
 		GAME_GET_COMPONENT(owner, owner, e);
 		if (owner.owner != shipOwner)
@@ -37,18 +37,18 @@ real shipLaserRadius = 2;
 
 namespace
 {
-	holder<spatialDataClass> initSpatialData()
+	holder<spatialData> initSpatialData()
 	{
 		spatialDataCreateConfig cfg;
 		return newSpatialData(cfg);
 	}
 
-	holder<spatialDataClass> spatialData = initSpatialData();
-	holder<threadPoolClass> threads = newThreadPool("ships_");
-	holder<mutexClass> mutex = newMutex();
+	holder<spatialData> spatialData = initSpatialData();
+	holder<threadPool> threads = newThreadPool("ships_");
+	holder<syncMutex> mutex = newSyncMutex();
 
 	uint32 tickIndex = 1;
-	holder<timerClass> timer = newTimer();
+	holder<timer> timer = newTimer();
 	variableSmoothingBuffer<uint64, 512> smoothTimeSpatialBuild;
 	variableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
 	variableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
@@ -67,10 +67,10 @@ namespace
 
 	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
 	{
-		holder<spatialQueryClass> spatialQuery = newSpatialQuery(spatialData.get());
-		entityManagerClass *ents = entities();
+		holder<spatialQuery> spatialQuery = newSpatialQuery(spatialData.get());
+		entityManager *ents = entities();
 
-		entityClass *const *entsArr = shipComponent::component->group()->array();
+		entity *const *entsArr = shipComponent::component->group()->array();
 		uint32 entsTotal = shipComponent::component->group()->count();
 		uint32 entsPerThr = entsTotal / thrCount;
 		uint32 myStart = entsPerThr * thrIndex;
@@ -83,9 +83,9 @@ namespace
 
 		for (uint32 entIndex = myStart; entIndex != myEnd; entIndex++)
 		{
-			entityClass *e = entsArr[entIndex];
+			entity *e = entsArr[entIndex];
 
-			ENGINE_GET_COMPONENT(transform, t, e);
+			CAGE_COMPONENT_ENGINE(transform, t, e);
 			GAME_GET_COMPONENT(ship, s, e);
 			GAME_GET_COMPONENT(owner, owner, e);
 			GAME_GET_COMPONENT(physics, phys, e);
@@ -111,8 +111,8 @@ namespace
 			{
 				if (nearbyName == myName)
 					continue;
-				entityClass *n = ents->get(nearbyName);
-				ENGINE_GET_COMPONENT(transform, nt, n);
+				entity *n = ents->get(nearbyName);
+				CAGE_COMPONENT_ENGINE(transform, nt, n);
 				vec3 d = nt.position - t.position;
 				real l = d.length();
 				if (l > 1e-7)
@@ -172,8 +172,8 @@ namespace
 			// accelerate towards target
 			if (ents->has(targetName))
 			{
-				entityClass *target = ents->get(targetName);
-				ENGINE_GET_COMPONENT(transform, targetTransform, target);
+				entity *target = ents->get(targetName);
+				CAGE_COMPONENT_ENGINE(transform, targetTransform, target);
 				vec3 f = targetTransform.position - t.position;
 				real l = f.length() - t.scale - targetTransform.scale;
 				if (l > 1e-7)
@@ -183,8 +183,8 @@ namespace
 			// fire at closest enemy
 			if (ents->has(closestTargetName))
 			{
-				entityClass *target = ents->get(closestTargetName);
-				ENGINE_GET_COMPONENT(transform, tt, target);
+				entity *target = ents->get(closestTargetName);
+				CAGE_COMPONENT_ENGINE(transform, tt, target);
 				vec3 o = front(t);
 				vec3 d = tt.position - o;
 				real l = d.length();
@@ -205,7 +205,7 @@ namespace
 					real lh = dh.length();
 					laser.trh.orientation = quat(dh, vec3(0, 1, 0));
 					laser.trh.scale = lh;
-					ENGINE_GET_COMPONENT(render, render, e);
+					CAGE_COMPONENT_ENGINE(render, render, e);
 					laser.color = render.color;
 					shots.push_back(laser);
 				}
@@ -221,17 +221,17 @@ namespace
 		}
 
 		{
-			scopeLock<mutexClass> lock(mutex);
+			scopeLock<syncMutex> lock(mutex);
 
 			// generate lasers
 			for (auto &it : shots)
 			{
-				entityClass *e = ents->createAnonymous();
-				ENGINE_GET_COMPONENT(transform, t, e);
+				entity *e = ents->createAnonymous();
+				CAGE_COMPONENT_ENGINE(transform, t, e);
 				t = it.tr;
 				transform &th = e->value<transformComponent>(transformComponent::componentHistory);
 				th = it.trh;
-				ENGINE_GET_COMPONENT(render, r, e);
+				CAGE_COMPONENT_ENGINE(render, r, e);
 				r.object = hashString("ants/laser/laser.obj");
 				r.color = it.color;
 				GAME_GET_COMPONENT(timeout, ttl, e);
@@ -252,11 +252,11 @@ namespace
 		// add all physics objects into spatial data
 		timer->reset();
 		spatialData->clear();
-		for (entityClass *e : physicsComponent::component->entities())
+		for (entity *e : physicsComponent::component->entities())
 		{
 			if (e->name() == 0)
 				continue;
-			ENGINE_GET_COMPONENT(transform, t, e);
+			CAGE_COMPONENT_ENGINE(transform, t, e);
 			spatialData->update(e->name(), sphere(t.position, t.scale));
 		}
 		spatialData->rebuild();

@@ -5,7 +5,7 @@
 #include <cage-core/math.h>
 #include <cage-core/config.h>
 #include <cage-core/assetManager.h>
-#include <cage-core/ini.h>
+#include <cage-core/configIni.h>
 #include <cage-core/hashString.h>
 
 #include <cage-client/core.h>
@@ -29,9 +29,9 @@ int main(int argc, const char *args[])
 {
 	try
 	{
-		holder<loggerClass> log1 = newLogger();
-		log1->format.bind<logFormatPolicyConsole>();
-		log1->output.bind<logOutputPolicyStdOut>();
+		holder<logger> log1 = newLogger();
+		log1->format.bind<logFormatConsole>();
+		log1->output.bind<logOutputStdOut>();
 
 		controlThread().timePerTick = 1000000 / 30;
 		engineInitialize(engineCreateConfig());
@@ -45,7 +45,7 @@ int main(int argc, const char *args[])
 		window()->setMaximized();
 
 		{
-			holder<engineProfilingClass> engineProfiling = newEngineProfiling();
+			holder<engineProfiling> engineProfiling = newEngineProfiling();
 			engineProfiling->profilingScope = engineProfilingScopeEnum::None;
 
 			engineStart();

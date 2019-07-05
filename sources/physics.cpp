@@ -4,9 +4,9 @@ namespace
 {
 	void engineUpdate()
 	{
-		for (entityClass *e : physicsComponent::component->entities())
+		for (entity *e : physicsComponent::component->entities())
 		{
-			ENGINE_GET_COMPONENT(transform, t, e);
+			CAGE_COMPONENT_ENGINE(transform, t, e);
 			GAME_GET_COMPONENT(physics, p, e);
 			CAGE_ASSERT_RUNTIME(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
 			CAGE_ASSERT_RUNTIME(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
