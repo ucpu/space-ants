@@ -22,7 +22,7 @@ namespace
 	{
 		CAGE_COMPONENT_ENGINE(transform, st, ship);
 		CAGE_COMPONENT_ENGINE(render, sr, ship);
-		GAME_GET_COMPONENT(physics, sp, ship);
+		ANTS_COMPONENT(physics, sp, ship);
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
@@ -37,32 +37,42 @@ namespace
 			CAGE_COMPONENT_ENGINE(textureAnimation, at, e);
 			at.startTime = currentControlTime();
 			at.speed = randomRange(0.7, 1.5);
-			GAME_GET_COMPONENT(physics, p, e);
+			ANTS_COMPONENT(physics, p, e);
 			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
-			GAME_GET_COMPONENT(timeout, ttl, e);
+			ANTS_COMPONENT(timeout, ttl, e);
 			ttl.ttl = numeric_cast<sint32>(real(30) / at.speed);
 		}
 	}
 
 	void engineUpdate()
 	{
-		for (entity *e : timeoutComponent::component->entities())
+		OPTICK_EVENT("timeout");
 		{
-			GAME_GET_COMPONENT(timeout, t, e);
-			if (t.ttl-- <= 0)
-				e->add(entitiesToDestroy);
-		}
-		for (entity *e : lifeComponent::component->entities())
-		{
-			GAME_GET_COMPONENT(life, l, e);
-			if (l.life <= 0)
+			OPTICK_EVENT("timeout");
+			for (entity *e : timeoutComponent::component->entities())
 			{
-				e->add(entitiesToDestroy);
-				if (e->has(shipComponent::component))
-					shipExplode(e);
+				ANTS_COMPONENT(timeout, t, e);
+				if (t.ttl-- <= 0)
+					e->add(entitiesToDestroy);
 			}
 		}
-		entitiesToDestroy->destroy();
+		{
+			OPTICK_EVENT("life");
+			for (entity *e : lifeComponent::component->entities())
+			{
+				ANTS_COMPONENT(life, l, e);
+				if (l.life <= 0)
+				{
+					e->add(entitiesToDestroy);
+					if (e->has(shipComponent::component))
+						shipExplode(e);
+				}
+			}
+		}
+		{
+			OPTICK_EVENT("entities destroy");
+			entitiesToDestroy->destroy();
+		}
 	}
 
 	void engineInitialize()

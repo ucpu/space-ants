@@ -20,7 +20,7 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)currentRandomGenerator().next()));
 	for (entity *e : planets)
 	{
-		GAME_GET_COMPONENT(owner, owner, e);
+		ANTS_COMPONENT(owner, owner, e);
 		if (owner.owner != shipOwner)
 			return e->name();
 	}
@@ -43,12 +43,14 @@ namespace
 		return newSpatialData(cfg);
 	}
 
-	holder<spatialData> spatialData = initSpatialData();
-	holder<threadPool> threads = newThreadPool("ships_");
+	holder<threadPool> initThreadPool();
+
+	holder<spatialData> spatialSearchData = initSpatialData();
+	holder<threadPool> threads = initThreadPool();
 	holder<syncMutex> mutex = newSyncMutex();
 
 	uint32 tickIndex = 1;
-	holder<timer> timer = newTimer();
+	holder<timer> clock = newTimer();
 	variableSmoothingBuffer<uint64, 512> smoothTimeSpatialBuild;
 	variableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
 	variableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
@@ -67,7 +69,9 @@ namespace
 
 	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
 	{
-		holder<spatialQuery> spatialQuery = newSpatialQuery(spatialData.get());
+		OPTICK_EVENT("ships");
+
+		holder<spatialQuery> spatialQuery = newSpatialQuery(spatialSearchData.get());
 		entityManager *ents = entities();
 
 		entity *const *entsArr = shipComponent::component->group()->array();
@@ -86,14 +90,14 @@ namespace
 			entity *e = entsArr[entIndex];
 
 			CAGE_COMPONENT_ENGINE(transform, t, e);
-			GAME_GET_COMPONENT(ship, s, e);
-			GAME_GET_COMPONENT(owner, owner, e);
-			GAME_GET_COMPONENT(physics, phys, e);
+			ANTS_COMPONENT(ship, s, e);
+			ANTS_COMPONENT(owner, owner, e);
+			ANTS_COMPONENT(physics, phys, e);
 
 			// destroy ships that wandered too far away
 			if (t.position.squaredLength() > sqr(200))
 			{
-				GAME_GET_COMPONENT(life, life, e);
+				ANTS_COMPONENT(life, life, e);
 				life.life = 0;
 				continue;
 			}
@@ -122,13 +126,13 @@ namespace
 				}
 				if (n->has(ownerComponent::component))
 				{
-					GAME_GET_COMPONENT(owner, no, n);
+					ANTS_COMPONENT(owner, no, n);
 					if (no.owner == owner.owner)
 					{
 						// friend
 						if (n->has(shipComponent::component))
 						{
-							GAME_GET_COMPONENT(physics, np, n);
+							ANTS_COMPONENT(physics, np, n);
 							avgPos += nt.position;
 							if (np.velocity.squaredLength() > 1e-10)
 								avgDir += np.velocity.normalize();
@@ -192,7 +196,7 @@ namespace
 				{
 					// fire at the target
 					CAGE_ASSERT_RUNTIME(target->has(lifeComponent::component));
-					GAME_GET_COMPONENT(life, targetLife, target);
+					ANTS_COMPONENT(life, targetLife, target);
 					targetLife.life--;
 					const transform &th = e->value<transformComponent>(transformComponent::componentHistory);
 					const transform &tth = target->value<transformComponent>(transformComponent::componentHistory);
@@ -221,6 +225,7 @@ namespace
 		}
 
 		{
+			OPTICK_EVENT("generate lasers");
 			scopeLock<syncMutex> lock(mutex);
 
 			// generate lasers
@@ -234,7 +239,7 @@ namespace
 				CAGE_COMPONENT_ENGINE(render, r, e);
 				r.object = hashString("ants/laser/laser.obj");
 				r.color = it.color;
-				GAME_GET_COMPONENT(timeout, ttl, e);
+				ANTS_COMPONENT(timeout, ttl, e);
 				ttl.ttl = 1;
 			}
 
@@ -247,26 +252,43 @@ namespace
 		}
 	}
 
+	holder<threadPool> initThreadPool()
+	{
+		auto thrs = newThreadPool("ships ", processorsCount() - 1);
+		thrs->function.bind<&shipsUpdateEntry>();
+		return thrs;
+	}
+
 	void engineUpdate()
 	{
+		OPTICK_EVENT("ships");
+
 		// add all physics objects into spatial data
-		timer->reset();
-		spatialData->clear();
-		for (entity *e : physicsComponent::component->entities())
+		clock->reset();
 		{
-			if (e->name() == 0)
-				continue;
-			CAGE_COMPONENT_ENGINE(transform, t, e);
-			spatialData->update(e->name(), sphere(t.position, t.scale));
+			OPTICK_EVENT("spatial update");
+			spatialSearchData->clear();
+			for (entity *e : physicsComponent::component->entities())
+			{
+				if (e->name() == 0)
+					continue;
+				CAGE_COMPONENT_ENGINE(transform, t, e);
+				spatialSearchData->update(e->name(), sphere(t.position, t.scale));
+			}
 		}
-		spatialData->rebuild();
-		smoothTimeSpatialBuild.add(timer->microsSinceLast());
+		{
+			OPTICK_EVENT("spatial rebuild");
+			spatialSearchData->rebuild();
+		}
+		smoothTimeSpatialBuild.add(clock->microsSinceLast());
 
 		// update ships
-		timer->reset();
-		threads->function.bind<&shipsUpdateEntry>();
-		threads->run();
-		smoothTimeShipsUpdate.add(timer->microsSinceLast());
+		clock->reset();
+		{
+			OPTICK_EVENT("ships update");
+			threads->run();
+		}
+		smoothTimeShipsUpdate.add(clock->microsSinceLast());
 
 		// log timing
 		if (tickIndex++ % 120 == 0)

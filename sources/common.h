@@ -11,6 +11,8 @@
 #include <cage-client/core.h>
 #include <cage-client/engine.h>
 
+#include <optick.h>
+
 using namespace cage;
 
 struct physicsComponent
@@ -73,7 +75,7 @@ struct timeoutComponent
 
 extern entityGroup *entitiesToDestroy;
 
-#define GAME_GET_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
+#define ANTS_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
 
 uint32 pickTargetPlanet(uint32 shipOwner);
 

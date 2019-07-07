@@ -4,10 +4,11 @@ namespace
 {
 	void engineUpdate()
 	{
+		OPTICK_EVENT("physics");
 		for (entity *e : physicsComponent::component->entities())
 		{
 			CAGE_COMPONENT_ENGINE(transform, t, e);
-			GAME_GET_COMPONENT(physics, p, e);
+			ANTS_COMPONENT(physics, p, e);
 			CAGE_ASSERT_RUNTIME(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
 			CAGE_ASSERT_RUNTIME(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
 			p.velocity += p.acceleration;

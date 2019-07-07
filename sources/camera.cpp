@@ -19,7 +19,7 @@ namespace
 			{
 				entity *ship = entities()->get(shipName);
 				CAGE_COMPONENT_ENGINE(transform, t, ship);
-				GAME_GET_COMPONENT(physics, p, ship);
+				ANTS_COMPONENT(physics, p, ship);
 				a.add(t.position);
 				if (p.velocity.squaredLength() > 1e-7)
 					b.add(t.position - p.velocity.normalize() * 5);
@@ -126,6 +126,7 @@ namespace
 
 	void engineUpdate()
 	{
+		OPTICK_EVENT("camera");
 		CAGE_COMPONENT_ENGINE(transform, tc, camera);
 		CAGE_COMPONENT_ENGINE(transform, ts, cameraSkybox);
 		ts.orientation = tc.orientation;
