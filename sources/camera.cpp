@@ -21,8 +21,8 @@ namespace
 				CAGE_COMPONENT_ENGINE(transform, t, ship);
 				ANTS_COMPONENT(physics, p, ship);
 				a.add(t.position);
-				if (p.velocity.squaredLength() > 1e-7)
-					b.add(t.position - p.velocity.normalize() * 5);
+				if (squaredLength(p.velocity) > 1e-7)
+					b.add(t.position - normalize(p.velocity) * 5);
 			}
 			else
 			{

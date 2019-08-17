@@ -95,7 +95,7 @@ namespace
 			ANTS_COMPONENT(physics, phys, e);
 
 			// destroy ships that wandered too far away
-			if (t.position.squaredLength() > sqr(200))
+			if (squaredLength(t.position) > sqr(200))
 			{
 				ANTS_COMPONENT(life, life, e);
 				life.life = 0;
@@ -118,7 +118,7 @@ namespace
 				entity *n = ents->get(nearbyName);
 				CAGE_COMPONENT_ENGINE(transform, nt, n);
 				vec3 d = nt.position - t.position;
-				real l = d.length();
+				real l = length(d);
 				if (l > 1e-7)
 				{
 					vec3 dn = d / l;
@@ -134,8 +134,8 @@ namespace
 						{
 							ANTS_COMPONENT(physics, np, n);
 							avgPos += nt.position;
-							if (np.velocity.squaredLength() > 1e-10)
-								avgDir += np.velocity.normalize();
+							if (squaredLength(np.velocity) > 1e-10)
+								avgDir += normalize(np.velocity);
 							avgCnt++;
 						}
 					}
@@ -153,10 +153,10 @@ namespace
 			if (avgCnt > 0)
 			{
 				avgPos = avgPos / avgCnt - t.position;
-				if (avgPos.squaredLength() > 1e-10)
-					phys.acceleration += avgPos.normalize() * shipCohesion; // cohesion
-				if (avgDir.squaredLength() > 1e-10)
-					phys.acceleration += avgDir.normalize() * shipAlignment; // alignment
+				if (squaredLength(avgPos) > 1e-10)
+					phys.acceleration += normalize(avgPos) * shipCohesion; // cohesion
+				if (squaredLength(avgDir) > 1e-10)
+					phys.acceleration += normalize(avgDir) * shipAlignment; // alignment
 			}
 
 			// choose a target to follow
@@ -179,9 +179,9 @@ namespace
 				entity *target = ents->get(targetName);
 				CAGE_COMPONENT_ENGINE(transform, targetTransform, target);
 				vec3 f = targetTransform.position - t.position;
-				real l = f.length() - t.scale - targetTransform.scale;
+				real l = length(f) - t.scale - targetTransform.scale;
 				if (l > 1e-7)
-					phys.acceleration += f.normalize() * shipTargetShips;
+					phys.acceleration += normalize(f) * shipTargetShips;
 			}
 
 			// fire at closest enemy
@@ -191,11 +191,11 @@ namespace
 				CAGE_COMPONENT_ENGINE(transform, tt, target);
 				vec3 o = front(t);
 				vec3 d = tt.position - o;
-				real l = d.length();
+				real l = length(d);
 				if (l < shipLaserRadius + tt.scale)
 				{
 					// fire at the target
-					CAGE_ASSERT_RUNTIME(target->has(lifeComponent::component));
+					CAGE_ASSERT(target->has(lifeComponent::component));
 					ANTS_COMPONENT(life, targetLife, target);
 					targetLife.life--;
 					const transform &th = e->value<transformComponent>(transformComponent::componentHistory);
@@ -206,7 +206,7 @@ namespace
 					laser.tr.scale = l;
 					laser.trh.position = front(th);
 					vec3 dh = tth.position - laser.trh.position;
-					real lh = dh.length();
+					real lh = length(dh);
 					laser.trh.orientation = quat(dh, vec3(0, 1, 0));
 					laser.trh.scale = lh;
 					CAGE_COMPONENT_ENGINE(render, render, e);
@@ -215,12 +215,12 @@ namespace
 				}
 			}
 
-			CAGE_ASSERT_RUNTIME(phys.acceleration.valid() && phys.velocity.valid(), phys.acceleration, phys.velocity, t.position);
+			CAGE_ASSERT(phys.acceleration.valid() && phys.velocity.valid(), phys.acceleration, phys.velocity, t.position);
 
 			{
 				// update ship orientation
-				if (phys.acceleration.squaredLength() > 1e-10)
-					t.orientation = quat(phys.acceleration.normalize(), t.orientation * vec3(0, 1, 0));
+				if (squaredLength(phys.acceleration) > 1e-10)
+					t.orientation = quat(normalize(phys.acceleration), t.orientation * vec3(0, 1, 0));
 			}
 		}
 

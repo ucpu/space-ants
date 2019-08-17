@@ -9,11 +9,11 @@ namespace
 		{
 			CAGE_COMPONENT_ENGINE(transform, t, e);
 			ANTS_COMPONENT(physics, p, e);
-			CAGE_ASSERT_RUNTIME(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
-			CAGE_ASSERT_RUNTIME(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
+			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
+			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
 			p.velocity += p.acceleration;
-			if (p.velocity.squaredLength() > p.maxSpeed.sqr())
-				p.velocity = p.velocity.normalize() * p.maxSpeed;
+			if (squaredLength(p.velocity) > sqr(p.maxSpeed))
+				p.velocity = normalize(p.velocity) * p.maxSpeed;
 			p.acceleration = vec3();
 			t.position += p.velocity;
 			t.orientation = p.rotation * t.orientation;
