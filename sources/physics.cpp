@@ -12,7 +12,7 @@ namespace
 			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
 			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
 			p.velocity += p.acceleration;
-			if (squaredLength(p.velocity) > sqr(p.maxSpeed))
+			if (lengthSquared(p.velocity) > sqr(p.maxSpeed))
 				p.velocity = normalize(p.velocity) * p.maxSpeed;
 			p.acceleration = vec3();
 			t.position += p.velocity;

@@ -95,7 +95,7 @@ namespace
 			ANTS_COMPONENT(physics, phys, e);
 
 			// destroy ships that wandered too far away
-			if (squaredLength(t.position) > sqr(200))
+			if (lengthSquared(t.position) > sqr(200))
 			{
 				ANTS_COMPONENT(life, life, e);
 				life.life = 0;
@@ -134,7 +134,7 @@ namespace
 						{
 							ANTS_COMPONENT(physics, np, n);
 							avgPos += nt.position;
-							if (squaredLength(np.velocity) > 1e-10)
+							if (lengthSquared(np.velocity) > 1e-10)
 								avgDir += normalize(np.velocity);
 							avgCnt++;
 						}
@@ -153,9 +153,9 @@ namespace
 			if (avgCnt > 0)
 			{
 				avgPos = avgPos / avgCnt - t.position;
-				if (squaredLength(avgPos) > 1e-10)
+				if (lengthSquared(avgPos) > 1e-10)
 					phys.acceleration += normalize(avgPos) * shipCohesion; // cohesion
-				if (squaredLength(avgDir) > 1e-10)
+				if (lengthSquared(avgDir) > 1e-10)
 					phys.acceleration += normalize(avgDir) * shipAlignment; // alignment
 			}
 
@@ -219,7 +219,7 @@ namespace
 
 			{
 				// update ship orientation
-				if (squaredLength(phys.acceleration) > 1e-10)
+				if (lengthSquared(phys.acceleration) > 1e-10)
 					t.orientation = quat(normalize(phys.acceleration), t.orientation * vec3(0, 1, 0));
 			}
 		}

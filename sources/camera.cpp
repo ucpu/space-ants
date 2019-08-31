@@ -21,7 +21,7 @@ namespace
 				CAGE_COMPONENT_ENGINE(transform, t, ship);
 				ANTS_COMPONENT(physics, p, ship);
 				a.add(t.position);
-				if (squaredLength(p.velocity) > 1e-7)
+				if (lengthSquared(p.velocity) > 1e-7)
 					b.add(t.position - normalize(p.velocity) * 5);
 			}
 			else
@@ -88,11 +88,11 @@ namespace
 			t.position = vec3(0, 0, 200);
 			CAGE_COMPONENT_ENGINE(camera, c, camera);
 			c.cameraOrder = 2;
-			c.renderMask = 1;
+			c.sceneMask = 1;
 			c.near = 1;
 			c.far = 500;
 			c.ambientLight = vec3(0.1);
-			c.clear = (cameraClearFlags)0;
+			c.clear = cameraClearFlags::None;
 			c.effects = cameraEffectsFlags::CombinedPass & ~cameraEffectsFlags::AmbientOcclusion;
 			CAGE_COMPONENT_ENGINE(listener, ls, camera);
 			CAGE_COMPONENT_ENGINE(light, l, camera);
@@ -104,7 +104,7 @@ namespace
 			CAGE_COMPONENT_ENGINE(transform, t, cameraSkybox);
 			CAGE_COMPONENT_ENGINE(camera, c, cameraSkybox);
 			c.cameraOrder = 1;
-			c.renderMask = 2;
+			c.sceneMask = 2;
 			c.near = 0.1;
 			c.far = 100;
 			c.ambientLight = vec3(1);
@@ -114,7 +114,7 @@ namespace
 			CAGE_COMPONENT_ENGINE(transform, t, objectSkybox);
 			CAGE_COMPONENT_ENGINE(render, r, objectSkybox);
 			r.object = hashString("ants/skybox/skybox.object");
-			r.renderMask = 2;
+			r.sceneMask = 2;
 		}
 		manualCamera = newCameraController(camera);
 		manualCamera->freeMove = true;
