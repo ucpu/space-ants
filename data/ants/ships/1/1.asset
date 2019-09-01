@@ -2,12 +2,14 @@
 []
 scheme = mesh
 scale = 0.25
+export_tangent = false
 override_material = fine.cpm
 1.obj?fine
 
 []
 scheme = mesh
 scale = 0.25
+export_tangent = false
 override_material = fine.cpm
 1.obj?coarse;middle
 

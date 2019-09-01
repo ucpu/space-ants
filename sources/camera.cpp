@@ -97,7 +97,7 @@ namespace
 			CAGE_COMPONENT_ENGINE(listener, ls, camera);
 			CAGE_COMPONENT_ENGINE(light, l, camera);
 			l.lightType = lightTypeEnum::Directional;
-			l.color = vec3(1);
+			l.color = vec3(3);
 		}
 		cameraSkybox = entities()->createUnique();
 		{
@@ -107,7 +107,7 @@ namespace
 			c.sceneMask = 2;
 			c.near = 0.1;
 			c.far = 100;
-			c.ambientLight = vec3(1);
+			c.ambientLight = vec3(2);
 		}
 		objectSkybox = entities()->createUnique();
 		{
