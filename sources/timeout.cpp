@@ -9,13 +9,13 @@ namespace
 {
 	vec3 colorVariation(const vec3 &c)
 	{
-		vec3 hsv = convertRgbToHsv(c);
+		vec3 hsv = colorRgbToHsv(c);
 		hsv[0] += randomRange(0.8, 1.2);
 		hsv[0] = hsv[0] % 1;
 		hsv[1] += randomRange(-0.2, 0.2);
 		hsv[2] += randomRange(-0.2, 0.2);
 		hsv = clamp(hsv, 0, 1);
-		return convertHsvToRgb(hsv);
+		return colorHsvToRgb(hsv);
 	}
 
 	void shipExplode(entity *ship)

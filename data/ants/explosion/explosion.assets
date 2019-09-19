@@ -1,15 +1,15 @@
 
 []
 scheme = mesh
-export_normal = false
-export_tangent = false
+normals = false
+
 scale = 2
 particle.blend
 
 []
 scheme = texture
-target = 2d_array
-animation_loop = false
+target = 2dArray
+animationLoop = false
 srgb = true
 particle/burn_$$.png
 

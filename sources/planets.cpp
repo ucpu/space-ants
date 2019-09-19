@@ -33,7 +33,7 @@ namespace
 		playerColors.resize(playersCount);
 		real hueOff = randomChance();
 		for (uint32 p = 0; p < playersCount; p++)
-			playerColors[p] = convertHsvToRgb(vec3((real(p) / playersCount + hueOff) % 1, randomRange(0.5, 1.0), randomRange(0.5, 1.0)));
+			playerColors[p] = colorHsvToRgb(vec3((real(p) / playersCount + hueOff) % 1, randomRange(0.5, 1.0), randomRange(0.5, 1.0)));
 		uint32 planetsCount = randomRange(3u, 12u);
 		for (uint32 p = 0; p < planetsCount; p++)
 		{

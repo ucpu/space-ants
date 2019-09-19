@@ -1,14 +1,14 @@
 [base]
-emissive = 3
+emission = 3
 mask = 0.5
 
 [textures]
 albedo = particle/burn_$$.png
 
 [flags]
-no-lighting
-no-shadow-cast
-two-sided
-opacity-texture
+noLighting
+noShadowCast
+twoSided
+opacityTexture
 transparency
 

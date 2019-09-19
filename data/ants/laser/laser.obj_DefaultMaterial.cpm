@@ -1,7 +1,7 @@
 [base]
-emissive = 3
+emission = 3
 mask = 1
 
 [flags]
-no-lighting
-no-shadow-cast
+noLighting
+noShadowCast

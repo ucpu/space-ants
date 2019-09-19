@@ -5,16 +5,16 @@ skybox.pack
 
 []
 scheme = mesh
-export_normal = false
-export_tangent = false
+normals = false
+
 skybox.obj
 
 []
 scheme = texture
-target = cube_map
-convert = skybox_to_cube
+target = cubeMap
+convert = skyboxToCube
 srgb = true
-flip_v = true
+flip = true
 skybox.png
 
 []
