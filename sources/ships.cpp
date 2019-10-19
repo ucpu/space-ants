@@ -110,7 +110,7 @@ namespace
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
 			real closestTargetDistance = real::Infinity();
-			shipsInteracted += spatialQuery->resultCount();
+			shipsInteracted += numeric_cast<uint32>(spatialQuery->result().size());
 			for (uint32 nearbyName : spatialQuery->result())
 			{
 				if (nearbyName == myName)
