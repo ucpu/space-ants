@@ -2,8 +2,8 @@
 
 #include <cage-core/hashString.h>
 #include <cage-core/variableSmoothingBuffer.h>
-#include <cage-client/cameraController.h>
-#include <cage-client/window.h>
+#include <cage-engine/cameraController.h>
+#include <cage-engine/window.h>
 
 namespace
 {

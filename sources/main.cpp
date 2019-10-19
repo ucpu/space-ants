@@ -8,11 +8,11 @@
 #include <cage-core/configIni.h>
 #include <cage-core/hashString.h>
 
-#include <cage-client/core.h>
-#include <cage-client/window.h>
-#include <cage-client/engine.h>
-#include <cage-client/engineProfiling.h>
-#include <cage-client/highPerformanceGpuHint.h>
+#include <cage-engine/core.h>
+#include <cage-engine/window.h>
+#include <cage-engine/engine.h>
+#include <cage-engine/engineProfiling.h>
+#include <cage-engine/highPerformanceGpuHint.h>
 
 using namespace cage;
 

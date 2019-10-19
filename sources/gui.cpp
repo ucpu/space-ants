@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-#include <cage-client/gui.h>
+#include <cage-engine/gui.h>
 
 namespace
 {
