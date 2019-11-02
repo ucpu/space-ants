@@ -2,14 +2,13 @@
 
 #include <cage-core/hashString.h>
 #include <cage-core/variableSmoothingBuffer.h>
-#include <cage-engine/cameraController.h>
+#include <cage-engine/fpsCamera.h>
 #include <cage-engine/window.h>
 
 namespace
 {
 	class autoCameraClass
 	{
-
 		variableSmoothingBuffer<vec3, 30> a;
 		variableSmoothingBuffer<vec3, 30> b;
 
@@ -56,7 +55,7 @@ namespace
 	entity *camera;
 	entity *cameraSkybox;
 	entity *objectSkybox;
-	holder<cameraController> manualCamera;
+	holder<fpsCamera> manualCamera;
 	autoCameraClass autoCamera;
 	eventListener<void(uint32, uint32, modifiersFlags)> keyPressListener;
 
@@ -116,7 +115,7 @@ namespace
 			r.object = hashString("ants/skybox/skybox.object");
 			r.sceneMask = 2;
 		}
-		manualCamera = newCameraController(camera);
+		manualCamera = newFpsCamera(camera);
 		manualCamera->freeMove = true;
 		manualCamera->mouseButton = mouseButtonsFlags::Left;
 		manualCamera->movementSpeed = 3;

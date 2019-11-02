@@ -1,7 +1,7 @@
 #include <exception>
 
 #include <cage-core/core.h>
-#include <cage-core/log.h>
+#include <cage-core/logger.h>
 #include <cage-core/math.h>
 #include <cage-core/config.h>
 #include <cage-core/assetManager.h>
@@ -12,6 +12,7 @@
 #include <cage-engine/window.h>
 #include <cage-engine/engine.h>
 #include <cage-engine/engineProfiling.h>
+#include <cage-engine/fullscreenSwitcher.h>
 #include <cage-engine/highPerformanceGpuHint.h>
 
 using namespace cage;
@@ -33,6 +34,7 @@ int main(int argc, const char *args[])
 		log1->format.bind<logFormatConsole>();
 		log1->output.bind<logOutputStdOut>();
 
+		configSetBool("cage.config.autoSave", true);
 		controlThread().timePerTick = 1000000 / 30;
 		engineInitialize(engineCreateConfig());
 		assets()->add(hashString("ants/ants.pack"));
@@ -40,11 +42,10 @@ int main(int argc, const char *args[])
 		eventListener<bool()> windowCloseListener;
 		windowCloseListener.bind<&windowClose>();
 		window()->events.windowClose.attach(windowCloseListener);
-
 		window()->title("space-ants");
-		window()->setMaximized();
 
 		{
+			holder<fullscreenSwitcher> fullscreen = newFullscreenSwitcher({});
 			holder<engineProfiling> engineProfiling = newEngineProfiling();
 			engineProfiling->profilingScope = engineProfilingScopeEnum::None;
 
@@ -53,15 +54,6 @@ int main(int argc, const char *args[])
 
 		assets()->remove(hashString("ants/ants.pack"));
 		engineFinalize();
-
-		try
-		{
-			configSaveIni("space-ants.ini", "space-ants");
-		}
-		catch (...)
-		{
-			CAGE_LOG(severityEnum::Warning, "ants", "failed to save game configuration");
-		}
 		return 0;
 	}
 	catch (const cage::exception &e)
