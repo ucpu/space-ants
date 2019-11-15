@@ -88,7 +88,7 @@ namespace
 				c.min.f = 0;
 				c.max.f = 0.05;
 				c.step.f = 0.0002;
-				c.value = *propertyValues[i];
+				c.value = stringizer() + *propertyValues[i];
 			}
 		}
 

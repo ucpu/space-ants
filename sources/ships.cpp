@@ -293,9 +293,9 @@ namespace
 		// log timing
 		if (tickIndex++ % 120 == 0)
 		{
-			CAGE_LOG(severityEnum::Info, "performance", string() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
-			CAGE_LOG(severityEnum::Info, "performance", string() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
-			CAGE_LOG(severityEnum::Info, "performance", string() + "Ships interaction ratio: " + real(shipsInteractionRatio.smooth()) * 0.001);
+			CAGE_LOG(severityEnum::Info, "performance", stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
+			CAGE_LOG(severityEnum::Info, "performance", stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
+			CAGE_LOG(severityEnum::Info, "performance", stringizer() + "Ships interaction ratio: " + real(shipsInteractionRatio.smooth()) * 0.001);
 		}
 	}
 
@@ -307,9 +307,6 @@ namespace
 		{
 			engineUpdateListener.attach(controlThread().update, 30);
 			engineUpdateListener.bind<&engineUpdate>();
-
-			//currentRandomGenerator().s[0] = 13;
-			//currentRandomGenerator().s[1] = 42;
 		}
 	} callbacksInitInstance;
 }
