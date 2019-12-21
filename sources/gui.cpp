@@ -66,7 +66,7 @@ namespace
 			t.value = "Ships";
 		}
 
-		CAGE_ASSERT_COMPILE(sizeof(propertyNames) / sizeof(propertyNames[0]) == sizeof(propertyValues) / sizeof(propertyValues[0]), arrays_must_have_same_length);
+		static_assert(sizeof(propertyNames) / sizeof(propertyNames[0]) == sizeof(propertyValues) / sizeof(propertyValues[0]), "arrays must have same length");
 		for (uint32 i = 0; i < sizeof(propertyNames) / sizeof(propertyNames[0]); i++)
 		{
 			entity *lab = g->entities()->createUnique();

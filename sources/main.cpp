@@ -34,7 +34,7 @@ int main(int argc, const char *args[])
 		log1->format.bind<logFormatConsole>();
 		log1->output.bind<logOutputStdOut>();
 
-		configSetBool("cage.config.autoSave", true);
+		configSetBool("cage/config/autoSave", true);
 		controlThread().timePerTick = 1000000 / 30;
 		engineInitialize(engineCreateConfig());
 		assets()->add(hashString("ants/ants.pack"));

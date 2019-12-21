@@ -1,4 +1,7 @@
 
+[base]
+emission = 2
+
 [textures]
 albedo = skybox.png
 
