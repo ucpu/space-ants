@@ -1,8 +1,8 @@
-#include <initializer_list>
-
 #include "common.h"
 
 #include <cage-engine/gui.h>
+
+#include <initializer_list>
 
 namespace
 {
@@ -31,15 +31,15 @@ namespace
 		// nothing
 	}
 
-	eventListener<void(uint32)> guiListener;
+	EventListener<void(uint32)> guiListener;
 
 	void guiEvent(uint32 name)
 	{
 		uint32 index = name - 20;
 		if (index < sizeof(propertyValues) / sizeof(propertyValues[0]))
 		{
-			entity *e = gui()->entities()->get(name);
-			CAGE_COMPONENT_GUI(input, input, e);
+			Entity *e = gui()->entities()->get(name);
+			CAGE_COMPONENT_GUI(Input, input, e);
 			if (input.valid)
 				*propertyValues[index] = input.value.toFloat();
 		}
@@ -47,44 +47,44 @@ namespace
 
 	void engineInitialize()
 	{
-		guiManager *g = cage::gui();
+		Gui *g = cage::gui();
 		guiListener.attach(g->widgetEvent);
 		guiListener.bind<&guiEvent>();
 
-		entity *topLeft = g->entities()->createUnique();
+		Entity *topLeft = g->entities()->createUnique();
 		{
-			CAGE_COMPONENT_GUI(scrollbars, sc, topLeft);
+			CAGE_COMPONENT_GUI(Scrollbars, sc, topLeft);
 		}
 
-		entity *table = g->entities()->createUnique();
+		Entity *table = g->entities()->createUnique();
 		{
-			CAGE_COMPONENT_GUI(spoiler, c, table);
-			CAGE_COMPONENT_GUI(layoutTable, l, table);
-			CAGE_COMPONENT_GUI(parent, child, table);
+			CAGE_COMPONENT_GUI(Spoiler, c, table);
+			CAGE_COMPONENT_GUI(LayoutTable, l, table);
+			CAGE_COMPONENT_GUI(Parent, child, table);
 			child.parent = topLeft->name();
-			CAGE_COMPONENT_GUI(text, t, table);
+			CAGE_COMPONENT_GUI(Text, t, table);
 			t.value = "Ships";
 		}
 
 		static_assert(sizeof(propertyNames) / sizeof(propertyNames[0]) == sizeof(propertyValues) / sizeof(propertyValues[0]), "arrays must have same length");
 		for (uint32 i = 0; i < sizeof(propertyNames) / sizeof(propertyNames[0]); i++)
 		{
-			entity *lab = g->entities()->createUnique();
+			Entity *lab = g->entities()->createUnique();
 			{
-				CAGE_COMPONENT_GUI(parent, child, lab);
+				CAGE_COMPONENT_GUI(Parent, child, lab);
 				child.parent = table->name();
 				child.order = i * 2 + 0;
-				CAGE_COMPONENT_GUI(label, c, lab);
-				CAGE_COMPONENT_GUI(text, t, lab);
+				CAGE_COMPONENT_GUI(Label, c, lab);
+				CAGE_COMPONENT_GUI(Text, t, lab);
 				t.value = propertyNames[i];
 			}
-			entity *con = g->entities()->create(20 + i);
+			Entity *con = g->entities()->create(20 + i);
 			{
-				CAGE_COMPONENT_GUI(parent, child, con);
+				CAGE_COMPONENT_GUI(Parent, child, con);
 				child.parent = table->name();
 				child.order = i * 2 + 1;
-				CAGE_COMPONENT_GUI(input, c, con);
-				c.type = inputTypeEnum::Real;
+				CAGE_COMPONENT_GUI(Input, c, con);
+				c.type = InputTypeEnum::Real;
 				c.min.f = 0;
 				c.max.f = 0.05;
 				c.step.f = 0.0002;
@@ -95,19 +95,19 @@ namespace
 		for (uint32 i : { 5, 6 })
 		{
 			// radiuses
-			CAGE_COMPONENT_GUI(input, c, g->entities()->get(20 + i));
+			CAGE_COMPONENT_GUI(Input, c, g->entities()->get(20 + i));
 			c.min.f = 0.1;
 			c.max.f = 10.0;
 			c.step.f = 0.1;
 		}
 	}
 
-	class callbacksInitClass
+	class Callbacks
 	{
-		eventListener<void()> engineInitListener;
-		eventListener<void()> engineUpdateListener;
+		EventListener<void()> engineInitListener;
+		EventListener<void()> engineUpdateListener;
 	public:
-		callbacksInitClass()
+		Callbacks()
 		{
 			engineInitListener.attach(controlThread().initialize);
 			engineInitListener.bind<&engineInitialize>();

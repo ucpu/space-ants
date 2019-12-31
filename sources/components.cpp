@@ -1,27 +1,27 @@
 #include "common.h"
 
-#define COMPONENTS_LIST physicsComponent, ownerComponent, lifeComponent, shipComponent, planetComponent, timeoutComponent
+#define COMPONENTS_LIST PhysicsComponent, OwnerComponent, LifeComponent, ShipComponent, PlanetComponent, TimeoutComponent
 
-#define GCHL_GENERATE(N) entityComponent *N::component;
+#define GCHL_GENERATE(N) EntityComponent *N::component;
 CAGE_EVAL_SMALL(CAGE_EXPAND_ARGS(GCHL_GENERATE, COMPONENTS_LIST))
 #undef GCHL_GENERATE
 
-physicsComponent::physicsComponent() : maxSpeed(0.1)
+PhysicsComponent::PhysicsComponent() : maxSpeed(0.1)
 {}
 
-ownerComponent::ownerComponent() : owner(0)
+OwnerComponent::OwnerComponent() : owner(0)
 {}
 
-lifeComponent::lifeComponent() : life(0)
+LifeComponent::LifeComponent() : life(0)
 {}
 
-shipComponent::shipComponent() : currentTarget(0), longtermTarget(0)
+ShipComponent::ShipComponent() : currentTarget(0), longtermTarget(0)
 {}
 
-planetComponent::planetComponent() : batch(0)
+PlanetComponent::PlanetComponent() : batch(0)
 {}
 
-timeoutComponent::timeoutComponent() : ttl(1)
+TimeoutComponent::TimeoutComponent() : ttl(1)
 {}
 
 namespace
@@ -33,11 +33,11 @@ namespace
 #undef GCHL_GENERATE
 	}
 
-	class callbacksInitClass
+	class Callbacks
 	{
-		eventListener<void()> engineInitListener;
+		EventListener<void()> engineInitListener;
 	public:
-		callbacksInitClass()
+		Callbacks()
 		{
 			engineInitListener.attach(controlThread().initialize, -100);
 			engineInitListener.bind<&engineInitialize>();

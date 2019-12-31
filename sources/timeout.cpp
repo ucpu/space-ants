@@ -3,7 +3,7 @@
 #include <cage-core/hashString.h>
 #include <cage-core/color.h>
 
-entityGroup *entitiesToDestroy;
+EntityGroup *entitiesToDestroy;
 
 namespace
 {
@@ -18,28 +18,28 @@ namespace
 		return colorHsvToRgb(hsv);
 	}
 
-	void shipExplode(entity *ship)
+	void shipExplode(Entity *ship)
 	{
-		CAGE_COMPONENT_ENGINE(transform, st, ship);
-		CAGE_COMPONENT_ENGINE(render, sr, ship);
-		ANTS_COMPONENT(physics, sp, ship);
+		CAGE_COMPONENT_ENGINE(Transform, st, ship);
+		CAGE_COMPONENT_ENGINE(Render, sr, ship);
+		ANTS_COMPONENT(Physics, sp, ship);
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
-			entity *e = entities()->createAnonymous();
-			CAGE_COMPONENT_ENGINE(transform, t, e);
+			Entity *e = entities()->createAnonymous();
+			CAGE_COMPONENT_ENGINE(Transform, t, e);
 			t.scale = st.scale;
 			t.position = st.position + randomDirection3() * st.scale;
 			t.orientation = randomDirectionQuat();
-			CAGE_COMPONENT_ENGINE(render, r, e);
-			r.object = hashString("ants/explosion/particle.blend");
+			CAGE_COMPONENT_ENGINE(Render, r, e);
+			r.object = HashString("ants/explosion/particle.blend");
 			r.color = colorVariation(sr.color) * 2;
-			CAGE_COMPONENT_ENGINE(textureAnimation, at, e);
+			CAGE_COMPONENT_ENGINE(TextureAnimation, at, e);
 			at.startTime = currentControlTime();
 			at.speed = randomRange(0.7, 1.5);
-			ANTS_COMPONENT(physics, p, e);
+			ANTS_COMPONENT(Physics, p, e);
 			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
-			ANTS_COMPONENT(timeout, ttl, e);
+			ANTS_COMPONENT(Timeout, ttl, e);
 			ttl.ttl = numeric_cast<sint32>(real(30) / at.speed);
 		}
 	}
@@ -49,22 +49,22 @@ namespace
 		OPTICK_EVENT("timeout");
 		{
 			OPTICK_EVENT("timeout");
-			for (entity *e : timeoutComponent::component->entities())
+			for (Entity *e : TimeoutComponent::component->entities())
 			{
-				ANTS_COMPONENT(timeout, t, e);
+				ANTS_COMPONENT(Timeout, t, e);
 				if (t.ttl-- <= 0)
 					e->add(entitiesToDestroy);
 			}
 		}
 		{
 			OPTICK_EVENT("life");
-			for (entity *e : lifeComponent::component->entities())
+			for (Entity *e : LifeComponent::component->entities())
 			{
-				ANTS_COMPONENT(life, l, e);
+				ANTS_COMPONENT(Life, l, e);
 				if (l.life <= 0)
 				{
 					e->add(entitiesToDestroy);
-					if (e->has(shipComponent::component))
+					if (e->has(ShipComponent::component))
 						shipExplode(e);
 				}
 			}
@@ -80,17 +80,17 @@ namespace
 		entitiesToDestroy = entities()->defineGroup();
 	}
 
-	class callbacksInitClass
+	class Callbacks
 	{
-		eventListener<void()> engineInitListener;
-		eventListener<void()> engineUpdateListener;
+		EventListener<void()> engineInitListener;
+		EventListener<void()> engineUpdateListener;
 	public:
-		callbacksInitClass()
+		Callbacks()
 		{
 			engineInitListener.attach(controlThread().initialize, -90);
 			engineInitListener.bind<&engineInitialize>();
 			engineUpdateListener.attach(controlThread().update, 90);
 			engineUpdateListener.bind<&engineUpdate>();
 		}
-	} callbacksInitInstance;
+	} callbacksInstance;
 }

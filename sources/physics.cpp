@@ -5,10 +5,10 @@ namespace
 	void engineUpdate()
 	{
 		OPTICK_EVENT("physics");
-		for (entity *e : physicsComponent::component->entities())
+		for (Entity *e : PhysicsComponent::component->entities())
 		{
-			CAGE_COMPONENT_ENGINE(transform, t, e);
-			ANTS_COMPONENT(physics, p, e);
+			CAGE_COMPONENT_ENGINE(Transform, t, e);
+			ANTS_COMPONENT(Physics, p, e);
 			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
 			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
 			p.velocity += p.acceleration;
@@ -20,14 +20,14 @@ namespace
 		}
 	}
 
-	class callbacksInitClass
+	class Callbacks
 	{
-		eventListener<void()> engineUpdateListener;
+		EventListener<void()> engineUpdateListener;
 	public:
-		callbacksInitClass()
+		Callbacks()
 		{
 			engineUpdateListener.attach(controlThread().update, 100);
 			engineUpdateListener.bind<&engineUpdate>();
 		}
-	} callbacksInitInstance;
+	} callbacksInstance;
 }

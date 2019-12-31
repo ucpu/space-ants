@@ -1,21 +1,21 @@
-#include <vector>
-
 #include "common.h"
 
 #include <cage-core/hashString.h>
 #include <cage-core/color.h>
 
+#include <vector>
+
 namespace
 {
 	const uint32 modelNames[] = {
-		hashString("ants/planets/farcodev/0.object"),
-		hashString("ants/planets/farcodev/1.object"),
-		hashString("ants/planets/farcodev/2.object"),
-		hashString("ants/planets/farcodev/3.object"),
-		hashString("ants/planets/farcodev/4.object"),
-		hashString("ants/planets/farcodev/5.object"),
-		hashString("ants/planets/farcodev/6.object"),
-		hashString("ants/planets/farcodev/7.object"),
+		HashString("ants/planets/farcodev/0.object"),
+		HashString("ants/planets/farcodev/1.object"),
+		HashString("ants/planets/farcodev/2.object"),
+		HashString("ants/planets/farcodev/3.object"),
+		HashString("ants/planets/farcodev/4.object"),
+		HashString("ants/planets/farcodev/5.object"),
+		HashString("ants/planets/farcodev/6.object"),
+		HashString("ants/planets/farcodev/7.object"),
 	};
 
 #ifdef CAGE_DEBUG
@@ -37,44 +37,44 @@ namespace
 		uint32 planetsCount = randomRange(3u, 12u);
 		for (uint32 p = 0; p < planetsCount; p++)
 		{
-			entity *e = entities()->createUnique();
-			CAGE_COMPONENT_ENGINE(transform, t, e);
+			Entity *e = entities()->createUnique();
+			CAGE_COMPONENT_ENGINE(Transform, t, e);
 			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
 			t.scale = 5;
-			ANTS_COMPONENT(owner, owner, e);
+			ANTS_COMPONENT(Owner, owner, e);
 			owner.owner = p % playersCount;
-			CAGE_COMPONENT_ENGINE(render, r, e);
+			CAGE_COMPONENT_ENGINE(Render, r, e);
 			r.object = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
 			r.color = playerColors[owner.owner];
-			ANTS_COMPONENT(physics, physics, e);
+			ANTS_COMPONENT(Physics, physics, e);
 			physics.rotation = interpolate(quat(), randomDirectionQuat(), 0.0003);
-			ANTS_COMPONENT(life, life, e);
+			ANTS_COMPONENT(Life, life, e);
 			life.life = randomRange(1000000, 2000000);
-			ANTS_COMPONENT(planet, planet, e);
+			ANTS_COMPONENT(Planet, planet, e);
 			planet.batch = randomRange(3 * batchScale, 5 * batchScale);
 		}
 	}
 
-	void createShip(entity *planet, uint32 target)
+	void createShip(Entity *planet, uint32 target)
 	{
-		entity *e = entities()->createUnique();
-		CAGE_COMPONENT_ENGINE(transform, planetTransform, planet);
-		CAGE_COMPONENT_ENGINE(transform, t, e);
+		Entity *e = entities()->createUnique();
+		CAGE_COMPONENT_ENGINE(Transform, planetTransform, planet);
+		CAGE_COMPONENT_ENGINE(Transform, t, e);
 		t.scale = 0.3;
 		t.position = planetTransform.position + randomDirection3() * (t.scale + planetTransform.scale + 1e-5);
 		t.orientation = randomDirectionQuat();
-		ANTS_COMPONENT(owner, planetOwner, planet);
-		ANTS_COMPONENT(owner, owner, e);
+		ANTS_COMPONENT(Owner, planetOwner, planet);
+		ANTS_COMPONENT(Owner, owner, e);
 		owner.owner = planetOwner.owner;
-		CAGE_COMPONENT_ENGINE(render, planetRender, planet);
-		CAGE_COMPONENT_ENGINE(render, r, e);
+		CAGE_COMPONENT_ENGINE(Render, planetRender, planet);
+		CAGE_COMPONENT_ENGINE(Render, r, e);
 		r.color = planetRender.color;
-		r.object = hashString("ants/ships/1/1.object");
-		ANTS_COMPONENT(physics, physics, e);
-		ANTS_COMPONENT(life, life, e);
+		r.object = HashString("ants/ships/1/1.object");
+		ANTS_COMPONENT(Physics, physics, e);
+		ANTS_COMPONENT(Life, life, e);
 		life.life = randomRange(200, 300);
-		ANTS_COMPONENT(ship, ship, e);
+		ANTS_COMPONENT(Ship, ship, e);
 		ship.longtermTarget = target;
 	}
 
@@ -83,17 +83,17 @@ namespace
 	void engineUpdate()
 	{
 		OPTICK_EVENT("planets");
-		uint32 shipsCount = shipComponent::component->group()->count();
-		uint32 planetsCount = planetComponent::component->group()->count();
+		uint32 shipsCount = ShipComponent::component->group()->count();
+		uint32 planetsCount = PlanetComponent::component->group()->count();
 		uint32 currentIndex = 0;
-		for (entity *e : planetComponent::component->entities())
+		for (Entity *e : PlanetComponent::component->entities())
 		{
-			ANTS_COMPONENT(planet, p, e);
+			ANTS_COMPONENT(Planet, p, e);
 			if (currentIndex++ != (planetIndex % planetsCount))
 				continue;
 			if (shipsCount + p.batch > shipsLimit)
 				continue;
-			ANTS_COMPONENT(owner, owner, e);
+			ANTS_COMPONENT(Owner, owner, e);
 			uint32 target = pickTargetPlanet(owner.owner);
 			for (uint32 s = 0; s < p.batch; s++)
 				createShip(e, target);
@@ -102,17 +102,17 @@ namespace
 		}
 	}
 
-	class callbacksInitClass
+	class Callbacks
 	{
-		eventListener<void()> engineInitListener;
-		eventListener<void()> engineUpdateListener;
+		EventListener<void()> engineInitListener;
+		EventListener<void()> engineUpdateListener;
 	public:
-		callbacksInitClass()
+		Callbacks()
 		{
 			engineInitListener.attach(controlThread().initialize, -50);
 			engineInitListener.bind<&engineInitialize>();
 			engineUpdateListener.attach(controlThread().update, 60);
 			engineUpdateListener.bind<&engineUpdate>();
 		}
-	} callbacksInitInstance;
+	} callbacksInstance;
 }

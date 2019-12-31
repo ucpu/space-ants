@@ -1,8 +1,6 @@
 #ifndef ants_common_h_sdg456ds4hg6
 #define ants_common_h_sdg456ds4hg6
 
-#include <atomic>
-
 #include <cage-core/core.h>
 #include <cage-core/math.h>
 #include <cage-core/entities.h>
@@ -12,67 +10,69 @@
 
 #include <optick.h>
 
+#include <atomic>
+
 using namespace cage;
 
-struct physicsComponent
+struct PhysicsComponent
 {
-	static entityComponent *component;
+	static EntityComponent *component;
 
 	quat rotation;
 	vec3 velocity;
 	vec3 acceleration;
 	real maxSpeed;
 
-	physicsComponent();
+	PhysicsComponent();
 };
 
-struct ownerComponent
+struct OwnerComponent
 {
-	static entityComponent *component;
+	static EntityComponent *component;
 
 	uint32 owner;
 
-	ownerComponent();
+	OwnerComponent();
 };
 
-struct lifeComponent
+struct LifeComponent
 {
-	static entityComponent *component;
+	static EntityComponent *component;
 
 	std::atomic<sint32> life;
 
-	lifeComponent();
+	LifeComponent();
 };
 
-struct shipComponent
+struct ShipComponent
 {
-	static entityComponent *component;
+	static EntityComponent *component;
 
 	uint32 currentTarget;
 	uint32 longtermTarget;
 
-	shipComponent();
+	ShipComponent();
 };
 
-struct planetComponent
+struct PlanetComponent
 {
-	static entityComponent *component;
+	static EntityComponent *component;
 
 	uint32 batch; // number of ships to spawn
 
-	planetComponent();
+	PlanetComponent();
 };
 
-struct timeoutComponent
+struct TimeoutComponent
 {
-	static entityComponent *component;
+	static EntityComponent *component;
 
 	sint32 ttl;
 
-	timeoutComponent();
+	TimeoutComponent();
 };
 
-extern entityGroup *entitiesToDestroy;
+extern EntityGroup *entitiesToDestroy;
 
 #define ANTS_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
 

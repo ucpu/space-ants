@@ -1,7 +1,3 @@
-#include <vector>
-#include <algorithm>
-#include <random>
-
 #include "common.h"
 
 #include <cage-core/random.h>
@@ -13,14 +9,18 @@
 #include <cage-core/timer.h>
 #include <cage-core/variableSmoothingBuffer.h>
 
+#include <vector>
+#include <algorithm>
+#include <random>
+
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
-	auto range = planetComponent::component->entities();
-	std::vector<entity*> planets(range.begin(), range.end());
-	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)currentRandomGenerator().next()));
-	for (entity *e : planets)
+	auto range = PlanetComponent::component->entities();
+	std::vector<Entity*> planets(range.begin(), range.end());
+	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::getApplicationRandomGenerator().next()));
+	for (Entity *e : planets)
 	{
-		ANTS_COMPONENT(owner, owner, e);
+		ANTS_COMPONENT(Owner, owner, e);
 		if (owner.owner != shipOwner)
 			return e->name();
 	}
@@ -37,30 +37,30 @@ real shipLaserRadius = 2;
 
 namespace
 {
-	holder<spatialData> initSpatialData()
+	Holder<SpatialData> initSpatialData()
 	{
-		spatialDataCreateConfig cfg;
+		SpatialDataCreateConfig cfg;
 		return newSpatialData(cfg);
 	}
 
-	holder<threadPool> initThreadPool();
+	Holder<ThreadPool> initThreadPool();
 
-	holder<spatialData> spatialSearchData = initSpatialData();
-	holder<threadPool> threads = initThreadPool();
-	holder<syncMutex> mutex = newSyncMutex();
+	Holder<SpatialData> spatialSearchData = initSpatialData();
+	Holder<ThreadPool> threads = initThreadPool();
+	Holder<Mutex> mutex = newMutex();
 
 	uint32 tickIndex = 1;
-	holder<timer> clock = newTimer();
-	variableSmoothingBuffer<uint64, 512> smoothTimeSpatialBuild;
-	variableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
-	variableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
+	Holder<Timer> clock = newTimer();
+	VariableSmoothingBuffer<uint64, 512> smoothTimeSpatialBuild;
+	VariableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
+	VariableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
 
 	vec3 front(const transform &t)
 	{
 		return t.position + t.orientation * vec3(0, 0, -1) * t.scale;
 	}
 
-	struct laserStruct
+	struct Laser
 	{
 		transform tr;
 		transform trh;
@@ -71,52 +71,52 @@ namespace
 	{
 		OPTICK_EVENT("ships");
 
-		holder<spatialQuery> spatialQuery = newSpatialQuery(spatialSearchData.get());
-		entityManager *ents = entities();
+		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.get());
+		EntityManager *ents = entities();
 
-		entity *const *entsArr = shipComponent::component->group()->array();
-		uint32 entsTotal = shipComponent::component->group()->count();
+		Entity *const *entsArr = ShipComponent::component->group()->array();
+		uint32 entsTotal = ShipComponent::component->group()->count();
 		uint32 entsPerThr = entsTotal / thrCount;
 		uint32 myStart = entsPerThr * thrIndex;
 		uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
 
-		std::vector<laserStruct> shots;
+		std::vector<Laser> shots;
 		shots.reserve(myEnd - myStart);
 
 		uint32 shipsInteracted = 0;
 
 		for (uint32 entIndex = myStart; entIndex != myEnd; entIndex++)
 		{
-			entity *e = entsArr[entIndex];
+			Entity *e = entsArr[entIndex];
 
-			CAGE_COMPONENT_ENGINE(transform, t, e);
-			ANTS_COMPONENT(ship, s, e);
-			ANTS_COMPONENT(owner, owner, e);
-			ANTS_COMPONENT(physics, phys, e);
+			CAGE_COMPONENT_ENGINE(Transform, t, e);
+			ANTS_COMPONENT(Ship, s, e);
+			ANTS_COMPONENT(Owner, owner, e);
+			ANTS_COMPONENT(Physics, phys, e);
 
 			// destroy ships that wandered too far away
 			if (lengthSquared(t.position) > sqr(200))
 			{
-				ANTS_COMPONENT(life, life, e);
+				ANTS_COMPONENT(Life, life, e);
 				life.life = 0;
 				continue;
 			}
 
 			// find all nearby objects
-			spatialQuery->intersection(sphere(t.position, t.scale + shipDetectRadius));
+			SpatialQuery->intersection(sphere(t.position, t.scale + shipDetectRadius));
 			uint32 myName = e->name();
 			vec3 avgPos;
 			vec3 avgDir;
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
 			real closestTargetDistance = real::Infinity();
-			shipsInteracted += numeric_cast<uint32>(spatialQuery->result().size());
-			for (uint32 nearbyName : spatialQuery->result())
+			shipsInteracted += numeric_cast<uint32>(SpatialQuery->result().size());
+			for (uint32 nearbyName : SpatialQuery->result())
 			{
 				if (nearbyName == myName)
 					continue;
-				entity *n = ents->get(nearbyName);
-				CAGE_COMPONENT_ENGINE(transform, nt, n);
+				Entity *n = ents->get(nearbyName);
+				CAGE_COMPONENT_ENGINE(Transform, nt, n);
 				vec3 d = nt.position - t.position;
 				real l = length(d);
 				if (l > 1e-7)
@@ -124,15 +124,15 @@ namespace
 					vec3 dn = d / l;
 					phys.acceleration -= dn / sqr(max(l - t.scale - nt.scale, 1e-7)) * shipSeparation; // separation
 				}
-				if (n->has(ownerComponent::component))
+				if (n->has(OwnerComponent::component))
 				{
-					ANTS_COMPONENT(owner, no, n);
+					ANTS_COMPONENT(Owner, no, n);
 					if (no.owner == owner.owner)
 					{
 						// friend
-						if (n->has(shipComponent::component))
+						if (n->has(ShipComponent::component))
 						{
-							ANTS_COMPONENT(physics, np, n);
+							ANTS_COMPONENT(Physics, np, n);
 							avgPos += nt.position;
 							if (lengthSquared(np.velocity) > 1e-10)
 								avgDir += normalize(np.velocity);
@@ -176,8 +176,8 @@ namespace
 			// accelerate towards target
 			if (ents->has(targetName))
 			{
-				entity *target = ents->get(targetName);
-				CAGE_COMPONENT_ENGINE(transform, targetTransform, target);
+				Entity *target = ents->get(targetName);
+				CAGE_COMPONENT_ENGINE(Transform, targetTransform, target);
 				vec3 f = targetTransform.position - t.position;
 				real l = length(f) - t.scale - targetTransform.scale;
 				if (l > 1e-7)
@@ -187,20 +187,20 @@ namespace
 			// fire at closest enemy
 			if (ents->has(closestTargetName))
 			{
-				entity *target = ents->get(closestTargetName);
-				CAGE_COMPONENT_ENGINE(transform, tt, target);
+				Entity *target = ents->get(closestTargetName);
+				CAGE_COMPONENT_ENGINE(Transform, tt, target);
 				vec3 o = front(t);
 				vec3 d = tt.position - o;
 				real l = length(d);
 				if (l < shipLaserRadius + tt.scale)
 				{
 					// fire at the target
-					CAGE_ASSERT(target->has(lifeComponent::component));
-					ANTS_COMPONENT(life, targetLife, target);
+					CAGE_ASSERT(target->has(LifeComponent::component));
+					ANTS_COMPONENT(Life, targetLife, target);
 					targetLife.life--;
-					const transform &th = e->value<transformComponent>(transformComponent::componentHistory);
-					const transform &tth = target->value<transformComponent>(transformComponent::componentHistory);
-					laserStruct laser;
+					const transform &th = e->value<TransformComponent>(TransformComponent::componentHistory);
+					const transform &tth = target->value<TransformComponent>(TransformComponent::componentHistory);
+					Laser laser;
 					laser.tr.position = o;
 					laser.tr.orientation = quat(d, vec3(0, 1, 0));
 					laser.tr.scale = l;
@@ -209,7 +209,7 @@ namespace
 					real lh = length(dh);
 					laser.trh.orientation = quat(dh, vec3(0, 1, 0));
 					laser.trh.scale = lh;
-					CAGE_COMPONENT_ENGINE(render, render, e);
+					CAGE_COMPONENT_ENGINE(Render, render, e);
 					laser.color = render.color;
 					shots.push_back(laser);
 				}
@@ -226,20 +226,20 @@ namespace
 
 		{
 			OPTICK_EVENT("generate lasers");
-			scopeLock<syncMutex> lock(mutex);
+			ScopeLock<Mutex> lock(mutex);
 
 			// generate lasers
 			for (auto &it : shots)
 			{
-				entity *e = ents->createAnonymous();
-				CAGE_COMPONENT_ENGINE(transform, t, e);
+				Entity *e = ents->createAnonymous();
+				CAGE_COMPONENT_ENGINE(Transform, t, e);
 				t = it.tr;
-				transform &th = e->value<transformComponent>(transformComponent::componentHistory);
+				transform &th = e->value<TransformComponent>(TransformComponent::componentHistory);
 				th = it.trh;
-				CAGE_COMPONENT_ENGINE(render, r, e);
-				r.object = hashString("ants/laser/laser.obj");
+				CAGE_COMPONENT_ENGINE(Render, r, e);
+				r.object = HashString("ants/laser/laser.obj");
 				r.color = it.color;
-				ANTS_COMPONENT(timeout, ttl, e);
+				ANTS_COMPONENT(Timeout, ttl, e);
 				ttl.ttl = 1;
 			}
 
@@ -252,7 +252,7 @@ namespace
 		}
 	}
 
-	holder<threadPool> initThreadPool()
+	Holder<ThreadPool> initThreadPool()
 	{
 		auto thrs = newThreadPool("ships ", processorsCount() - 1);
 		thrs->function.bind<&shipsUpdateEntry>();
@@ -268,11 +268,11 @@ namespace
 		{
 			OPTICK_EVENT("spatial update");
 			spatialSearchData->clear();
-			for (entity *e : physicsComponent::component->entities())
+			for (Entity *e : PhysicsComponent::component->entities())
 			{
 				if (e->name() == 0)
 					continue;
-				CAGE_COMPONENT_ENGINE(transform, t, e);
+				CAGE_COMPONENT_ENGINE(Transform, t, e);
 				spatialSearchData->update(e->name(), sphere(t.position, t.scale));
 			}
 		}
@@ -293,20 +293,20 @@ namespace
 		// log timing
 		if (tickIndex++ % 120 == 0)
 		{
-			CAGE_LOG(severityEnum::Info, "performance", stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
-			CAGE_LOG(severityEnum::Info, "performance", stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
-			CAGE_LOG(severityEnum::Info, "performance", stringizer() + "Ships interaction ratio: " + real(shipsInteractionRatio.smooth()) * 0.001);
+			CAGE_LOG(SeverityEnum::Info, "performance", stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
+			CAGE_LOG(SeverityEnum::Info, "performance", stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
+			CAGE_LOG(SeverityEnum::Info, "performance", stringizer() + "Ships interaction ratio: " + real(shipsInteractionRatio.smooth()) * 0.001);
 		}
 	}
 
-	class callbacksInitClass
+	class Callbacks
 	{
-		eventListener<void()> engineUpdateListener;
+		EventListener<void()> engineUpdateListener;
 	public:
-		callbacksInitClass()
+		Callbacks()
 		{
 			engineUpdateListener.attach(controlThread().update, 30);
 			engineUpdateListener.bind<&engineUpdate>();
 		}
-	} callbacksInitInstance;
+	} callbacksInstance;
 }
