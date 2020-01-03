@@ -35,14 +35,14 @@ int main(int argc, const char *args[])
 		log1->output.bind<logOutputStdOut>();
 
 		configSetBool("cage/config/autoSave", true);
-		controlThread().timePerTick = 1000000 / 30;
 		engineInitialize(EngineCreateConfig());
-		assets()->add(HashString("ants/ants.pack"));
+		controlThread().updatePeriod(1000000 / 30);
+		engineAssets()->add(HashString("ants/ants.pack"));
 
 		EventListener<bool()> windowCloseListener;
 		windowCloseListener.bind<&windowClose>();
-		window()->events.windowClose.attach(windowCloseListener);
-		window()->title("space-ants");
+		engineWindow()->events.windowClose.attach(windowCloseListener);
+		engineWindow()->title("space-ants");
 
 		{
 			Holder<FullscreenSwitcher> fullscreen = newFullscreenSwitcher({});
@@ -52,7 +52,7 @@ int main(int argc, const char *args[])
 			engineStart();
 		}
 
-		assets()->remove(HashString("ants/ants.pack"));
+		engineAssets()->remove(HashString("ants/ants.pack"));
 		engineFinalize();
 		return 0;
 	}

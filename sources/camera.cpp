@@ -14,9 +14,9 @@ namespace
 
 		void updatePositions()
 		{
-			if (entities()->has(shipName))
+			if (engineEntities()->has(shipName))
 			{
-				Entity *ship = entities()->get(shipName);
+				Entity *ship = engineEntities()->get(shipName);
 				CAGE_COMPONENT_ENGINE(Transform, t, ship);
 				ANTS_COMPONENT(Physics, p, ship);
 				a.add(t.position);
@@ -81,7 +81,7 @@ namespace
 
 	void engineInitialize()
 	{
-		camera = entities()->createUnique();
+		camera = engineEntities()->createUnique();
 		{
 			CAGE_COMPONENT_ENGINE(Transform, t, camera);
 			t.position = vec3(0, 0, 200);
@@ -96,7 +96,7 @@ namespace
 			c.effects = CameraEffectsFlags::CombinedPass & ~CameraEffectsFlags::AmbientOcclusion;
 			CAGE_COMPONENT_ENGINE(Listener, ls, camera);
 		}
-		cameraSkybox = entities()->createUnique();
+		cameraSkybox = engineEntities()->createUnique();
 		{
 			CAGE_COMPONENT_ENGINE(Transform, t, cameraSkybox);
 			CAGE_COMPONENT_ENGINE(Camera, c, cameraSkybox);
@@ -105,7 +105,7 @@ namespace
 			c.near = 0.1;
 			c.far = 100;
 		}
-		objectSkybox = entities()->createUnique();
+		objectSkybox = engineEntities()->createUnique();
 		{
 			CAGE_COMPONENT_ENGINE(Transform, t, objectSkybox);
 			CAGE_COMPONENT_ENGINE(Render, r, objectSkybox);
@@ -116,7 +116,7 @@ namespace
 		manualCamera->freeMove = true;
 		manualCamera->mouseButton = MouseButtonsFlags::Left;
 		manualCamera->movementSpeed = 3;
-		keyPressListener.attach(window()->events.keyPress);
+		keyPressListener.attach(engineWindow()->events.keyPress);
 		keyPressListener.bind<&keyPress>();
 	}
 

@@ -37,7 +37,7 @@ namespace
 		uint32 planetsCount = randomRange(3u, 12u);
 		for (uint32 p = 0; p < planetsCount; p++)
 		{
-			Entity *e = entities()->createUnique();
+			Entity *e = engineEntities()->createUnique();
 			CAGE_COMPONENT_ENGINE(Transform, t, e);
 			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
@@ -58,7 +58,7 @@ namespace
 
 	void createShip(Entity *planet, uint32 target)
 	{
-		Entity *e = entities()->createUnique();
+		Entity *e = engineEntities()->createUnique();
 		CAGE_COMPONENT_ENGINE(Transform, planetTransform, planet);
 		CAGE_COMPONENT_ENGINE(Transform, t, e);
 		t.scale = 0.3;

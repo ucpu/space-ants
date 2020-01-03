@@ -26,7 +26,7 @@ namespace
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
-			Entity *e = entities()->createAnonymous();
+			Entity *e = engineEntities()->createAnonymous();
 			CAGE_COMPONENT_ENGINE(Transform, t, e);
 			t.scale = st.scale;
 			t.position = st.position + randomDirection3() * st.scale;
@@ -35,7 +35,7 @@ namespace
 			r.object = HashString("ants/explosion/particle.blend");
 			r.color = colorVariation(sr.color) * 2;
 			CAGE_COMPONENT_ENGINE(TextureAnimation, at, e);
-			at.startTime = currentControlTime();
+			at.startTime = engineControlTime();
 			at.speed = randomRange(0.7, 1.5);
 			ANTS_COMPONENT(Physics, p, e);
 			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
@@ -77,7 +77,7 @@ namespace
 
 	void engineInitialize()
 	{
-		entitiesToDestroy = entities()->defineGroup();
+		entitiesToDestroy = engineEntities()->defineGroup();
 	}
 
 	class Callbacks

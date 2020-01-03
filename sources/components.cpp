@@ -28,7 +28,7 @@ namespace
 {
 	void engineInitialize()
 	{
-#define GCHL_GENERATE(N) N::component = entities()->defineComponent(N(), true);
+#define GCHL_GENERATE(N) N::component = engineEntities()->defineComponent(N(), true);
 		CAGE_EVAL_SMALL(CAGE_EXPAND_ARGS(GCHL_GENERATE, COMPONENTS_LIST))
 #undef GCHL_GENERATE
 	}

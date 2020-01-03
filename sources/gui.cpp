@@ -38,7 +38,7 @@ namespace
 		uint32 index = name - 20;
 		if (index < sizeof(propertyValues) / sizeof(propertyValues[0]))
 		{
-			Entity *e = gui()->entities()->get(name);
+			Entity *e = engineGui()->entities()->get(name);
 			CAGE_COMPONENT_GUI(Input, input, e);
 			if (input.valid)
 				*propertyValues[index] = input.value.toFloat();
@@ -47,7 +47,7 @@ namespace
 
 	void engineInitialize()
 	{
-		Gui *g = cage::gui();
+		Gui *g = cage::engineGui();
 		guiListener.attach(g->widgetEvent);
 		guiListener.bind<&guiEvent>();
 

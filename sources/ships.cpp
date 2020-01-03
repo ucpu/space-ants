@@ -72,7 +72,7 @@ namespace
 		OPTICK_EVENT("ships");
 
 		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.get());
-		EntityManager *ents = entities();
+		EntityManager *ents = engineEntities();
 
 		Entity *const *entsArr = ShipComponent::component->group()->array();
 		uint32 entsTotal = ShipComponent::component->group()->count();
