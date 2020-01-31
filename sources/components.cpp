@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include <cage-core/macros.h>
+
 #define COMPONENTS_LIST PhysicsComponent, OwnerComponent, LifeComponent, ShipComponent, PlanetComponent, TimeoutComponent
 
 #define GCHL_GENERATE(N) EntityComponent *N::component;

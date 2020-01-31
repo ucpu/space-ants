@@ -74,7 +74,7 @@ struct TimeoutComponent
 
 extern EntityGroup *entitiesToDestroy;
 
-#define ANTS_COMPONENT(T,C,E) ::CAGE_JOIN(T, Component) &C = (E)->value<::CAGE_JOIN(T, Component)>(::CAGE_JOIN(T, Component)::component);
+#define ANTS_COMPONENT(T,C,E) ::T##Component &C = (E)->value<::T##Component>(::T##Component::component);
 
 uint32 pickTargetPlanet(uint32 shipOwner);
 
