@@ -90,8 +90,10 @@ namespace
 			c.sceneMask = 1;
 			c.near = 1;
 			c.far = 500;
-			c.ambientLight = vec3(0.1);
-			c.ambientDirectionalLight = vec3(3);
+			c.ambientColor = vec3(1);
+			c.ambientIntensity = 0.1;
+			c.ambientDirectionalColor = vec3(1);
+			c.ambientDirectionalIntensity = 3;
 			c.clear = CameraClearFlags::None;
 			c.effects = CameraEffectsFlags::CombinedPass & ~CameraEffectsFlags::AmbientOcclusion;
 			CAGE_COMPONENT_ENGINE(Listener, ls, camera);

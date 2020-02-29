@@ -33,7 +33,8 @@ namespace
 			t.orientation = randomDirectionQuat();
 			CAGE_COMPONENT_ENGINE(Render, r, e);
 			r.object = HashString("ants/explosion/particle.blend");
-			r.color = colorVariation(sr.color) * 2;
+			r.color = colorVariation(sr.color);
+			r.intensity = 2;
 			CAGE_COMPONENT_ENGINE(TextureAnimation, at, e);
 			at.startTime = engineControlTime();
 			at.speed = randomRange(0.7, 1.5);
