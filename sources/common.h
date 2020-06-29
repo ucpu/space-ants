@@ -21,55 +21,43 @@ struct PhysicsComponent
 	quat rotation;
 	vec3 velocity;
 	vec3 acceleration;
-	real maxSpeed;
-
-	PhysicsComponent();
+	real maxSpeed = 0.1;
 };
 
 struct OwnerComponent
 {
 	static EntityComponent *component;
 
-	uint32 owner;
-
-	OwnerComponent();
+	uint32 owner = 0;
 };
 
 struct LifeComponent
 {
 	static EntityComponent *component;
 
-	std::atomic<sint32> life;
-
-	LifeComponent();
+	sint32 life = 0; // this used to be atomic - todo fix
 };
 
 struct ShipComponent
 {
 	static EntityComponent *component;
 
-	uint32 currentTarget;
-	uint32 longtermTarget;
-
-	ShipComponent();
+	uint32 currentTarget = 0;
+	uint32 longtermTarget = 0;
 };
 
 struct PlanetComponent
 {
 	static EntityComponent *component;
 
-	uint32 batch; // number of ships to spawn
-
-	PlanetComponent();
+	uint32 batch = 0; // number of ships to spawn
 };
 
 struct TimeoutComponent
 {
 	static EntityComponent *component;
 
-	sint32 ttl;
-
-	TimeoutComponent();
+	sint32 ttl = 1;
 };
 
 extern EntityGroup *entitiesToDestroy;

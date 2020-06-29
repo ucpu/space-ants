@@ -1,7 +1,7 @@
 #include "common.h"
 
 #include <cage-core/random.h>
-#include <cage-core/spatial.h>
+#include <cage-core/spatialStructure.h>
 #include <cage-core/geometry.h>
 #include <cage-core/threadPool.h>
 #include <cage-core/concurrent.h>
@@ -37,15 +37,15 @@ real shipLaserRadius = 2;
 
 namespace
 {
-	Holder<SpatialData> initSpatialData()
+	Holder<SpatialStructure> initSpatialData()
 	{
-		SpatialDataCreateConfig cfg;
-		return newSpatialData(cfg);
+		SpatialStructureCreateConfig cfg;
+		return newSpatialStructure(cfg);
 	}
 
 	Holder<ThreadPool> initThreadPool();
 
-	Holder<SpatialData> spatialSearchData = initSpatialData();
+	Holder<SpatialStructure> spatialSearchData = initSpatialData();
 	Holder<ThreadPool> threads = initThreadPool();
 	Holder<Mutex> mutex = newMutex();
 
