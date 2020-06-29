@@ -9,8 +9,8 @@ namespace
 		{
 			CAGE_COMPONENT_ENGINE(Transform, t, e);
 			ANTS_COMPONENT(Physics, p, e);
-			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid(), p.acceleration, p.velocity, t.position);
-			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid(), p.rotation, t.orientation);
+			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid());
+			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid());
 			p.velocity += p.acceleration;
 			if (lengthSquared(p.velocity) > sqr(p.maxSpeed))
 				p.velocity = normalize(p.velocity) * p.maxSpeed;

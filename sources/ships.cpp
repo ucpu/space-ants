@@ -215,7 +215,7 @@ namespace
 				}
 			}
 
-			CAGE_ASSERT(phys.acceleration.valid() && phys.velocity.valid(), phys.acceleration, phys.velocity, t.position);
+			CAGE_ASSERT(phys.acceleration.valid() && phys.velocity.valid());
 
 			{
 				// update ship orientation
