@@ -1,11 +1,8 @@
 #ifndef ants_common_h_sdg456ds4hg6
 #define ants_common_h_sdg456ds4hg6
 
-#include <cage-core/core.h>
 #include <cage-core/math.h>
 #include <cage-core/entities.h>
-
-#include <cage-engine/core.h>
 #include <cage-engine/engine.h>
 
 #include <optick.h>
