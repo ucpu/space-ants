@@ -4,7 +4,7 @@ project(space-ants CXX)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cage/cmake")
 include(cage_all)
 cage_default_init()
-cage_directory_link("${CMAKE_CURRENT_SOURCE_DIR}/data/ants" "${CMAKE_BINARY_DIR}/result/data/ants")
+cage_assets_add_data_path("${CMAKE_CURRENT_SOURCE_DIR}/data")
 
 add_subdirectory(externals/cage)
 
