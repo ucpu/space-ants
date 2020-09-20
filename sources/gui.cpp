@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include <cage-core/string.h>
 #include <cage-engine/gui.h>
 
 #include <initializer_list>
@@ -41,7 +42,7 @@ namespace
 			Entity *e = engineGui()->entities()->get(name);
 			CAGE_COMPONENT_GUI(Input, input, e);
 			if (input.valid)
-				*propertyValues[index] = input.value.toFloat();
+				*propertyValues[index] = toFloat(input.value);
 		}
 	}
 
