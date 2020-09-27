@@ -32,11 +32,8 @@ namespace
 		}
 
 	public:
-		Entity *cam;
-		uint32 shipName;
-
-		AutoCamera() : cam(0), shipName(0)
-		{}
+		Entity *cam = nullptr;
+		uint32 shipName = 0;
 
 		void update()
 		{
@@ -48,6 +45,10 @@ namespace
 				t.position = b.smooth();
 				t.orientation = quat(a.smooth() - t.position, t.orientation * vec3(0, 1, 0));
 				t = interpolate(t2, t, 0.1);
+				CAGE_COMPONENT_ENGINE(Camera, c, cam);
+				c.depthOfField.focusDistance = distance(t.position, a.smooth()) * 2;
+				c.depthOfField.blendRadius = c.depthOfField.focusDistance * 2;
+				c.depthOfField.focusRadius = 0;
 			}
 		}
 	};
@@ -63,18 +64,21 @@ namespace
 	{
 		if (a == 32)
 		{
+			CAGE_COMPONENT_ENGINE(Camera, c, camera);
 			if (autoCamera.cam)
 			{
 				// switch to manual
 				autoCamera.cam = nullptr;
 				manualCamera->setEntity(camera);
 				autoCamera.shipName = 0;
+				c.effects &= ~CameraEffectsFlags::DepthOfField;
 			}
 			else
 			{
 				// switch to auto
 				autoCamera.cam = camera;
 				manualCamera->setEntity(nullptr);
+				c.effects |= CameraEffectsFlags::DepthOfField;
 			}
 		}
 	}
@@ -95,7 +99,7 @@ namespace
 			c.ambientDirectionalColor = vec3(1);
 			c.ambientDirectionalIntensity = 3;
 			c.clear = CameraClearFlags::None;
-			c.effects = CameraEffectsFlags::CombinedPass & ~CameraEffectsFlags::AmbientOcclusion;
+			c.effects = CameraEffectsFlags::Default & ~CameraEffectsFlags::AmbientOcclusion;
 			CAGE_COMPONENT_ENGINE(Listener, ls, camera);
 		}
 		cameraSkybox = engineEntities()->createUnique();
