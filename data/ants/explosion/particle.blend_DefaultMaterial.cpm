@@ -1,5 +1,7 @@
 [base]
 emission = 3
+
+[mult]
 mask = 0.5
 
 [textures]
@@ -9,6 +11,4 @@ albedo = particle/burn_$$.png
 noLighting
 noShadowCast
 twoSided
-opacityTexture
-transparency
 
