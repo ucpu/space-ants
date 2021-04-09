@@ -1,6 +1,6 @@
 
 []
-scheme = mesh
+scheme = model
 normals = false
 
 scale = 2

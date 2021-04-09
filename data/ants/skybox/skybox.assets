@@ -4,7 +4,7 @@ scheme = pack
 skybox.pack
 
 []
-scheme = mesh
+scheme = model
 normals = false
 
 skybox.obj

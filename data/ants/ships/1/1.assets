@@ -1,20 +1,20 @@
 
 []
-scheme = mesh
+scheme = model
 scale = 0.25
 
 material = fine.cpm
 1.obj?fine
 
 []
-scheme = mesh
+scheme = model
 scale = 0.25
 
 material = fine.cpm
 1.obj?coarse;middle
 
 []
-scheme = mesh
+scheme = model
 scale = 0.25
 uvs = false
 
