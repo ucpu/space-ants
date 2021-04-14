@@ -103,7 +103,7 @@ namespace
 			}
 
 			// find all nearby objects
-			SpatialQuery->intersection(sphere(t.position, t.scale + shipDetectRadius));
+			SpatialQuery->intersection(Sphere(t.position, t.scale + shipDetectRadius));
 			uint32 myName = e->name();
 			vec3 avgPos;
 			vec3 avgDir;
@@ -273,7 +273,7 @@ namespace
 				if (e->name() == 0)
 					continue;
 				CAGE_COMPONENT_ENGINE(Transform, t, e);
-				spatialSearchData->update(e->name(), sphere(t.position, t.scale));
+				spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
 			}
 		}
 		{
