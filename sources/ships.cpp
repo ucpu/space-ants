@@ -74,11 +74,11 @@ namespace
 		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.get());
 		EntityManager *ents = engineEntities();
 
-		Entity *const *entsArr = ShipComponent::component->group()->array();
-		uint32 entsTotal = ShipComponent::component->group()->count();
-		uint32 entsPerThr = entsTotal / thrCount;
-		uint32 myStart = entsPerThr * thrIndex;
-		uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
+		auto entsArr = ShipComponent::component->entities();
+		const uint32 entsTotal = ShipComponent::component->count();
+		const uint32 entsPerThr = entsTotal / thrCount;
+		const uint32 myStart = entsPerThr * thrIndex;
+		const uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
 
 		std::vector<Laser> shots;
 		shots.reserve(myEnd - myStart);

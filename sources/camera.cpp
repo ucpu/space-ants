@@ -25,9 +25,9 @@ namespace
 			}
 			else
 			{
-				uint32 cnt = ShipComponent::component->group()->count();
+				uint32 cnt = ShipComponent::component->count();
 				uint32 i = randomRange(0u, cnt);
-				shipName = ShipComponent::component->group()->array()[i]->name();
+				shipName = ShipComponent::component->entities()[i]->name();
 			}
 		}
 
