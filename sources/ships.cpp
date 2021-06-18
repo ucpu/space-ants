@@ -17,7 +17,7 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 {
 	auto range = PlanetComponent::component->entities();
 	std::vector<Entity*> planets(range.begin(), range.end());
-	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::getApplicationRandomGenerator().next()));
+	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::globalRandomGenerator().next()));
 	for (Entity *e : planets)
 	{
 		ANTS_COMPONENT(Owner, owner, e);
@@ -71,7 +71,7 @@ namespace
 	{
 		OPTICK_EVENT("ships");
 
-		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.get());
+		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.share());
 		EntityManager *ents = engineEntities();
 
 		auto entsArr = ShipComponent::component->entities();
@@ -280,7 +280,7 @@ namespace
 			OPTICK_EVENT("spatial rebuild");
 			spatialSearchData->rebuild();
 		}
-		smoothTimeSpatialBuild.add(clock->microsSinceLast());
+		smoothTimeSpatialBuild.add(clock->elapsed());
 
 		// update ships
 		clock->reset();
@@ -288,7 +288,7 @@ namespace
 			OPTICK_EVENT("ships update");
 			threads->run();
 		}
-		smoothTimeShipsUpdate.add(clock->microsSinceLast());
+		smoothTimeShipsUpdate.add(clock->elapsed());
 
 		// log timing
 		if (tickIndex++ % 120 == 0)
