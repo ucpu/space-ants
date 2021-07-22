@@ -58,11 +58,11 @@ namespace
 	Entity *objectSkybox;
 	Holder<FpsCamera> manualCamera;
 	AutoCamera autoCamera;
-	EventListener<void(uint32, uint32, ModifiersFlags)> keyPressListener;
+	EventListener<void(uint32, ModifiersFlags)> keyPressListener;
 
-	void keyPress(uint32 a, uint32 b, ModifiersFlags)
+	void keyPress(uint32 key, ModifiersFlags)
 	{
-		if (a == 32)
+		if (key == 32)
 		{
 			CAGE_COMPONENT_ENGINE(Camera, c, camera);
 			if (autoCamera.cam)
