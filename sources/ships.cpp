@@ -63,14 +63,11 @@ namespace
 	struct Laser
 	{
 		transform tr;
-		transform trh;
 		vec3 color;
 	};
 
 	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
 	{
-		OPTICK_EVENT("ships");
-
 		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.share());
 		EntityManager *ents = engineEntities();
 
@@ -198,17 +195,10 @@ namespace
 					CAGE_ASSERT(target->has(LifeComponent::component));
 					ANTS_COMPONENT(Life, targetLife, target);
 					targetLife.life--;
-					const transform &th = e->value<TransformComponent>(TransformComponent::componentHistory);
-					const transform &tth = target->value<TransformComponent>(TransformComponent::componentHistory);
 					Laser laser;
 					laser.tr.position = o;
 					laser.tr.orientation = quat(d, vec3(0, 1, 0));
 					laser.tr.scale = l;
-					laser.trh.position = front(th);
-					vec3 dh = tth.position - laser.trh.position;
-					real lh = length(dh);
-					laser.trh.orientation = quat(dh, vec3(0, 1, 0));
-					laser.trh.scale = lh;
 					CAGE_COMPONENT_ENGINE(Render, render, e);
 					laser.color = render.color;
 					shots.push_back(laser);
@@ -225,7 +215,6 @@ namespace
 		}
 
 		{
-			OPTICK_EVENT("generate lasers");
 			ScopeLock<Mutex> lock(mutex);
 
 			// generate lasers
@@ -234,8 +223,6 @@ namespace
 				Entity *e = ents->createAnonymous();
 				CAGE_COMPONENT_ENGINE(Transform, t, e);
 				t = it.tr;
-				transform &th = e->value<TransformComponent>(TransformComponent::componentHistory);
-				th = it.trh;
 				CAGE_COMPONENT_ENGINE(Render, r, e);
 				r.object = HashString("ants/laser/laser.obj");
 				r.color = it.color;
@@ -261,12 +248,9 @@ namespace
 
 	void engineUpdate()
 	{
-		OPTICK_EVENT("ships");
-
 		// add all physics objects into spatial data
 		clock->reset();
 		{
-			OPTICK_EVENT("spatial update");
 			spatialSearchData->clear();
 			for (Entity *e : PhysicsComponent::component->entities())
 			{
@@ -277,7 +261,6 @@ namespace
 			}
 		}
 		{
-			OPTICK_EVENT("spatial rebuild");
 			spatialSearchData->rebuild();
 		}
 		smoothTimeSpatialBuild.add(clock->elapsed());
@@ -285,7 +268,6 @@ namespace
 		// update ships
 		clock->reset();
 		{
-			OPTICK_EVENT("ships update");
 			threads->run();
 		}
 		smoothTimeShipsUpdate.add(clock->elapsed());

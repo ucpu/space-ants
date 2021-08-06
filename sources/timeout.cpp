@@ -47,9 +47,7 @@ namespace
 
 	void engineUpdate()
 	{
-		OPTICK_EVENT("timeout");
 		{
-			OPTICK_EVENT("timeout");
 			for (Entity *e : TimeoutComponent::component->entities())
 			{
 				ANTS_COMPONENT(Timeout, t, e);
@@ -58,7 +56,6 @@ namespace
 			}
 		}
 		{
-			OPTICK_EVENT("life");
 			for (Entity *e : LifeComponent::component->entities())
 			{
 				ANTS_COMPONENT(Life, l, e);
@@ -71,7 +68,6 @@ namespace
 			}
 		}
 		{
-			OPTICK_EVENT("entities destroy");
 			entitiesToDestroy->destroy();
 		}
 	}

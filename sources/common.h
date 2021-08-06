@@ -5,8 +5,6 @@
 #include <cage-core/entities.h>
 #include <cage-engine/engine.h>
 
-#include <optick.h>
-
 #include <atomic>
 
 using namespace cage;

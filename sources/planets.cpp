@@ -82,7 +82,6 @@ namespace
 
 	void engineUpdate()
 	{
-		OPTICK_EVENT("planets");
 		uint32 shipsCount = ShipComponent::component->group()->count();
 		uint32 planetsCount = PlanetComponent::component->group()->count();
 		uint32 currentIndex = 0;

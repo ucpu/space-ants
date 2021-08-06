@@ -4,7 +4,6 @@ namespace
 {
 	void engineUpdate()
 	{
-		OPTICK_EVENT("physics");
 		for (Entity *e : PhysicsComponent::component->entities())
 		{
 			CAGE_COMPONENT_ENGINE(Transform, t, e);

@@ -110,6 +110,7 @@ namespace
 			c.sceneMask = 2;
 			c.near = 0.1;
 			c.far = 100;
+			c.effects |= CameraEffectsFlags::MotionBlur;
 		}
 		objectSkybox = engineEntities()->createUnique();
 		{
@@ -128,7 +129,6 @@ namespace
 
 	void engineUpdate()
 	{
-		OPTICK_EVENT("camera");
 		CAGE_COMPONENT_ENGINE(Transform, tc, camera);
 		CAGE_COMPONENT_ENGINE(Transform, ts, cameraSkybox);
 		ts.orientation = tc.orientation;
