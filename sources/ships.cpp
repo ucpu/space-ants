@@ -86,7 +86,7 @@ namespace
 		{
 			Entity *e = entsArr[entIndex];
 
-			CAGE_COMPONENT_ENGINE(Transform, t, e);
+			TransformComponent &t = e->value<TransformComponent>();
 			ANTS_COMPONENT(Ship, s, e);
 			ANTS_COMPONENT(Owner, owner, e);
 			ANTS_COMPONENT(Physics, phys, e);
@@ -113,7 +113,7 @@ namespace
 				if (nearbyName == myName)
 					continue;
 				Entity *n = ents->get(nearbyName);
-				CAGE_COMPONENT_ENGINE(Transform, nt, n);
+				TransformComponent &nt = n->value<TransformComponent>();
 				vec3 d = nt.position - t.position;
 				real l = length(d);
 				if (l > 1e-7)
@@ -174,7 +174,7 @@ namespace
 			if (ents->has(targetName))
 			{
 				Entity *target = ents->get(targetName);
-				CAGE_COMPONENT_ENGINE(Transform, targetTransform, target);
+				TransformComponent &targetTransform = target->value<TransformComponent>();
 				vec3 f = targetTransform.position - t.position;
 				real l = length(f) - t.scale - targetTransform.scale;
 				if (l > 1e-7)
@@ -185,7 +185,7 @@ namespace
 			if (ents->has(closestTargetName))
 			{
 				Entity *target = ents->get(closestTargetName);
-				CAGE_COMPONENT_ENGINE(Transform, tt, target);
+				TransformComponent &tt = target->value<TransformComponent>();
 				vec3 o = front(t);
 				vec3 d = tt.position - o;
 				real l = length(d);
@@ -199,7 +199,7 @@ namespace
 					laser.tr.position = o;
 					laser.tr.orientation = quat(d, vec3(0, 1, 0));
 					laser.tr.scale = l;
-					CAGE_COMPONENT_ENGINE(Render, render, e);
+					RenderComponent &render = e->value<RenderComponent>();
 					laser.color = render.color;
 					shots.push_back(laser);
 				}
@@ -221,9 +221,9 @@ namespace
 			for (auto &it : shots)
 			{
 				Entity *e = ents->createAnonymous();
-				CAGE_COMPONENT_ENGINE(Transform, t, e);
+				TransformComponent &t = e->value<TransformComponent>();
 				t = it.tr;
-				CAGE_COMPONENT_ENGINE(Render, r, e);
+				RenderComponent &r = e->value<RenderComponent>();
 				r.object = HashString("ants/laser/laser.obj");
 				r.color = it.color;
 				ANTS_COMPONENT(Timeout, ttl, e);
@@ -256,7 +256,7 @@ namespace
 			{
 				if (e->name() == 0)
 					continue;
-				CAGE_COMPONENT_ENGINE(Transform, t, e);
+				TransformComponent &t = e->value<TransformComponent>();
 				spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
 			}
 		}

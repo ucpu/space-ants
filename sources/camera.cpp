@@ -17,7 +17,7 @@ namespace
 			if (engineEntities()->has(shipName))
 			{
 				Entity *ship = engineEntities()->get(shipName);
-				CAGE_COMPONENT_ENGINE(Transform, t, ship);
+				TransformComponent &t = ship->value<TransformComponent>();
 				ANTS_COMPONENT(Physics, p, ship);
 				a.add(t.position);
 				if (lengthSquared(p.velocity) > 1e-7)
@@ -40,12 +40,12 @@ namespace
 			updatePositions();
 			if (cam)
 			{
-				CAGE_COMPONENT_ENGINE(Transform, t, cam);
+				TransformComponent &t = cam->value<TransformComponent>();
 				transform t2 = t;
 				t.position = b.smooth();
 				t.orientation = quat(a.smooth() - t.position, t.orientation * vec3(0, 1, 0));
 				t = interpolate(t2, t, 0.1);
-				CAGE_COMPONENT_ENGINE(Camera, c, cam);
+				CameraComponent &c = cam->value<CameraComponent>();
 				c.depthOfField.focusDistance = distance(t.position, a.smooth()) * 2;
 				c.depthOfField.blendRadius = c.depthOfField.focusDistance * 2;
 				c.depthOfField.focusRadius = 0;
@@ -64,7 +64,7 @@ namespace
 	{
 		if (key == 32)
 		{
-			CAGE_COMPONENT_ENGINE(Camera, c, camera);
+			CameraComponent &c = camera->value<CameraComponent>();
 			if (autoCamera.cam)
 			{
 				// switch to manual
@@ -87,9 +87,9 @@ namespace
 	{
 		camera = engineEntities()->createUnique();
 		{
-			CAGE_COMPONENT_ENGINE(Transform, t, camera);
+			TransformComponent &t = camera->value<TransformComponent>();
 			t.position = vec3(0, 0, 200);
-			CAGE_COMPONENT_ENGINE(Camera, c, camera);
+			CameraComponent &c = camera->value<CameraComponent>();
 			c.cameraOrder = 2;
 			c.sceneMask = 1;
 			c.near = 1;
@@ -100,12 +100,12 @@ namespace
 			c.ambientDirectionalIntensity = 3;
 			c.clear = CameraClearFlags::None;
 			c.effects = CameraEffectsFlags::Default & ~CameraEffectsFlags::AmbientOcclusion;
-			CAGE_COMPONENT_ENGINE(Listener, ls, camera);
+			ListenerComponent &ls = camera->value<ListenerComponent>();
 		}
 		cameraSkybox = engineEntities()->createUnique();
 		{
-			CAGE_COMPONENT_ENGINE(Transform, t, cameraSkybox);
-			CAGE_COMPONENT_ENGINE(Camera, c, cameraSkybox);
+			TransformComponent &t = cameraSkybox->value<TransformComponent>();
+			CameraComponent &c = cameraSkybox->value<CameraComponent>();
 			c.cameraOrder = 1;
 			c.sceneMask = 2;
 			c.near = 0.1;
@@ -114,8 +114,8 @@ namespace
 		}
 		objectSkybox = engineEntities()->createUnique();
 		{
-			CAGE_COMPONENT_ENGINE(Transform, t, objectSkybox);
-			CAGE_COMPONENT_ENGINE(Render, r, objectSkybox);
+			TransformComponent &t = objectSkybox->value<TransformComponent>();
+			RenderComponent &r = objectSkybox->value<RenderComponent>();
 			r.object = HashString("ants/skybox/skybox.object");
 			r.sceneMask = 2;
 		}
@@ -129,8 +129,8 @@ namespace
 
 	void engineUpdate()
 	{
-		CAGE_COMPONENT_ENGINE(Transform, tc, camera);
-		CAGE_COMPONENT_ENGINE(Transform, ts, cameraSkybox);
+		TransformComponent &tc = camera->value<TransformComponent>();
+		TransformComponent &ts = cameraSkybox->value<TransformComponent>();
 		ts.orientation = tc.orientation;
 		autoCamera.update();
 	}

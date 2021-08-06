@@ -6,7 +6,7 @@ namespace
 	{
 		for (Entity *e : PhysicsComponent::component->entities())
 		{
-			CAGE_COMPONENT_ENGINE(Transform, t, e);
+			TransformComponent &t = e->value<TransformComponent>();
 			ANTS_COMPONENT(Physics, p, e);
 			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid());
 			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid());

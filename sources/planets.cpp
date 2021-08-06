@@ -38,13 +38,13 @@ namespace
 		for (uint32 p = 0; p < planetsCount; p++)
 		{
 			Entity *e = engineEntities()->createUnique();
-			CAGE_COMPONENT_ENGINE(Transform, t, e);
+			TransformComponent &t = e->value<TransformComponent>();
 			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
 			t.scale = 5;
 			ANTS_COMPONENT(Owner, owner, e);
 			owner.owner = p % playersCount;
-			CAGE_COMPONENT_ENGINE(Render, r, e);
+			RenderComponent &r = e->value<RenderComponent>();
 			r.object = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
 			r.color = playerColors[owner.owner];
 			ANTS_COMPONENT(Physics, physics, e);
@@ -59,16 +59,16 @@ namespace
 	void createShip(Entity *planet, uint32 target)
 	{
 		Entity *e = engineEntities()->createUnique();
-		CAGE_COMPONENT_ENGINE(Transform, planetTransform, planet);
-		CAGE_COMPONENT_ENGINE(Transform, t, e);
+		TransformComponent &planetTransform = planet->value<TransformComponent>();
+		TransformComponent &t = e->value<TransformComponent>();
 		t.scale = 0.3;
 		t.position = planetTransform.position + randomDirection3() * (t.scale + planetTransform.scale + 1e-5);
 		t.orientation = randomDirectionQuat();
 		ANTS_COMPONENT(Owner, planetOwner, planet);
 		ANTS_COMPONENT(Owner, owner, e);
 		owner.owner = planetOwner.owner;
-		CAGE_COMPONENT_ENGINE(Render, planetRender, planet);
-		CAGE_COMPONENT_ENGINE(Render, r, e);
+		RenderComponent &planetRender = planet->value<RenderComponent>();
+		RenderComponent &r = e->value<RenderComponent>();
 		r.color = planetRender.color;
 		r.object = HashString("ants/ships/1/1.object");
 		ANTS_COMPONENT(Physics, physics, e);

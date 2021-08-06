@@ -20,22 +20,22 @@ namespace
 
 	void shipExplode(Entity *ship)
 	{
-		CAGE_COMPONENT_ENGINE(Transform, st, ship);
-		CAGE_COMPONENT_ENGINE(Render, sr, ship);
+		TransformComponent &st = ship->value<TransformComponent>();
+		RenderComponent &sr = ship->value<RenderComponent>();
 		ANTS_COMPONENT(Physics, sp, ship);
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
 			Entity *e = engineEntities()->createAnonymous();
-			CAGE_COMPONENT_ENGINE(Transform, t, e);
+			TransformComponent &t = e->value<TransformComponent>();
 			t.scale = st.scale;
 			t.position = st.position + randomDirection3() * st.scale;
 			t.orientation = randomDirectionQuat();
-			CAGE_COMPONENT_ENGINE(Render, r, e);
+			RenderComponent &r = e->value<RenderComponent>();
 			r.object = HashString("ants/explosion/particle.blend");
 			r.color = colorVariation(sr.color);
 			r.intensity = 2;
-			CAGE_COMPONENT_ENGINE(TextureAnimation, at, e);
+			TextureAnimationComponent &at = e->value<TextureAnimationComponent>();
 			at.startTime = engineControlTime();
 			at.speed = randomRange(0.7, 1.5);
 			ANTS_COMPONENT(Physics, p, e);
