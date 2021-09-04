@@ -13,7 +13,7 @@ namespace
 			p.velocity += p.acceleration;
 			if (lengthSquared(p.velocity) > sqr(p.maxSpeed))
 				p.velocity = normalize(p.velocity) * p.maxSpeed;
-			p.acceleration = vec3();
+			p.acceleration = Vec3();
 			t.position += p.velocity;
 			t.orientation = p.rotation * t.orientation;
 		}

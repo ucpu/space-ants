@@ -7,9 +7,9 @@ EntityGroup *entitiesToDestroy;
 
 namespace
 {
-	vec3 colorVariation(const vec3 &c)
+	Vec3 colorVariation(const Vec3 &c)
 	{
-		vec3 hsv = colorRgbToHsv(c);
+		Vec3 hsv = colorRgbToHsv(c);
 		hsv[0] += randomRange(0.8, 1.2);
 		hsv[0] = hsv[0] % 1;
 		hsv[1] += randomRange(-0.2, 0.2);
@@ -41,7 +41,7 @@ namespace
 			ANTS_COMPONENT(Physics, p, e);
 			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
 			ANTS_COMPONENT(Timeout, ttl, e);
-			ttl.ttl = numeric_cast<sint32>(real(30) / at.speed);
+			ttl.ttl = numeric_cast<sint32>(Real(30) / at.speed);
 		}
 	}
 

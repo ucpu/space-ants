@@ -13,10 +13,10 @@ struct PhysicsComponent
 {
 	static EntityComponent *component;
 
-	quat rotation;
-	vec3 velocity;
-	vec3 acceleration;
-	real maxSpeed = 0.1;
+	Quat rotation;
+	Vec3 velocity;
+	Vec3 acceleration;
+	Real maxSpeed = 0.1;
 };
 
 struct OwnerComponent
@@ -61,12 +61,12 @@ extern EntityGroup *entitiesToDestroy;
 
 uint32 pickTargetPlanet(uint32 shipOwner);
 
-extern real shipSeparation;
-extern real shipTargetShips;
-extern real shipTargetPlanets;
-extern real shipCohesion;
-extern real shipAlignment;
-extern real shipDetectRadius;
-extern real shipLaserRadius;
+extern Real shipSeparation;
+extern Real shipTargetShips;
+extern Real shipTargetPlanets;
+extern Real shipCohesion;
+extern Real shipAlignment;
+extern Real shipDetectRadius;
+extern Real shipLaserRadius;
 
 #endif

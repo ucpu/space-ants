@@ -29,11 +29,11 @@ namespace
 	void engineInitialize()
 	{
 		uint32 playersCount = randomRange(2u, 5u);
-		std::vector<vec3> playerColors;
+		std::vector<Vec3> playerColors;
 		playerColors.resize(playersCount);
-		real hueOff = randomChance();
+		Real hueOff = randomChance();
 		for (uint32 p = 0; p < playersCount; p++)
-			playerColors[p] = colorHsvToRgb(vec3((real(p) / playersCount + hueOff) % 1, randomRange(0.5, 1.0), randomRange(0.5, 1.0)));
+			playerColors[p] = colorHsvToRgb(Vec3((Real(p) / playersCount + hueOff) % 1, randomRange(0.5, 1.0), randomRange(0.5, 1.0)));
 		uint32 planetsCount = randomRange(3u, 12u);
 		for (uint32 p = 0; p < planetsCount; p++)
 		{
@@ -48,7 +48,7 @@ namespace
 			r.object = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
 			r.color = playerColors[owner.owner];
 			ANTS_COMPONENT(Physics, physics, e);
-			physics.rotation = interpolate(quat(), randomDirectionQuat(), 0.0003);
+			physics.rotation = interpolate(Quat(), randomDirectionQuat(), 0.0003);
 			ANTS_COMPONENT(Life, life, e);
 			life.life = randomRange(1000000, 2000000);
 			ANTS_COMPONENT(Planet, planet, e);

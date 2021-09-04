@@ -27,13 +27,13 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 	return 0;
 }
 
-real shipSeparation = 0.002;
-real shipTargetShips = 0.005;
-real shipTargetPlanets = 0.001;
-real shipCohesion = 0.003;
-real shipAlignment = 0.001;
-real shipDetectRadius = 3;
-real shipLaserRadius = 2;
+Real shipSeparation = 0.002;
+Real shipTargetShips = 0.005;
+Real shipTargetPlanets = 0.001;
+Real shipCohesion = 0.003;
+Real shipAlignment = 0.001;
+Real shipDetectRadius = 3;
+Real shipLaserRadius = 2;
 
 namespace
 {
@@ -55,15 +55,15 @@ namespace
 	VariableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
 	VariableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
 
-	vec3 front(const transform &t)
+	Vec3 front(const Transform &t)
 	{
-		return t.position + t.orientation * vec3(0, 0, -1) * t.scale;
+		return t.position + t.orientation * Vec3(0, 0, -1) * t.scale;
 	}
 
 	struct Laser
 	{
-		transform tr;
-		vec3 color;
+		Transform tr;
+		Vec3 color;
 	};
 
 	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
@@ -102,11 +102,11 @@ namespace
 			// find all nearby objects
 			SpatialQuery->intersection(Sphere(t.position, t.scale + shipDetectRadius));
 			uint32 myName = e->name();
-			vec3 avgPos;
-			vec3 avgDir;
+			Vec3 avgPos;
+			Vec3 avgDir;
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
-			real closestTargetDistance = real::Infinity();
+			Real closestTargetDistance = Real::Infinity();
 			shipsInteracted += numeric_cast<uint32>(SpatialQuery->result().size());
 			for (uint32 nearbyName : SpatialQuery->result())
 			{
@@ -114,11 +114,11 @@ namespace
 					continue;
 				Entity *n = ents->get(nearbyName);
 				TransformComponent &nt = n->value<TransformComponent>();
-				vec3 d = nt.position - t.position;
-				real l = length(d);
+				Vec3 d = nt.position - t.position;
+				Real l = length(d);
 				if (l > 1e-7)
 				{
-					vec3 dn = d / l;
+					Vec3 dn = d / l;
 					phys.acceleration -= dn / sqr(max(l - t.scale - nt.scale, 1e-7)) * shipSeparation; // separation
 				}
 				if (n->has(OwnerComponent::component))
@@ -175,8 +175,8 @@ namespace
 			{
 				Entity *target = ents->get(targetName);
 				TransformComponent &targetTransform = target->value<TransformComponent>();
-				vec3 f = targetTransform.position - t.position;
-				real l = length(f) - t.scale - targetTransform.scale;
+				Vec3 f = targetTransform.position - t.position;
+				Real l = length(f) - t.scale - targetTransform.scale;
 				if (l > 1e-7)
 					phys.acceleration += normalize(f) * shipTargetShips;
 			}
@@ -186,9 +186,9 @@ namespace
 			{
 				Entity *target = ents->get(closestTargetName);
 				TransformComponent &tt = target->value<TransformComponent>();
-				vec3 o = front(t);
-				vec3 d = tt.position - o;
-				real l = length(d);
+				Vec3 o = front(t);
+				Vec3 d = tt.position - o;
+				Real l = length(d);
 				if (l < shipLaserRadius + tt.scale)
 				{
 					// fire at the target
@@ -197,7 +197,7 @@ namespace
 					targetLife.life--;
 					Laser laser;
 					laser.tr.position = o;
-					laser.tr.orientation = quat(d, vec3(0, 1, 0));
+					laser.tr.orientation = Quat(d, Vec3(0, 1, 0));
 					laser.tr.scale = l;
 					RenderComponent &render = e->value<RenderComponent>();
 					laser.color = render.color;
@@ -210,7 +210,7 @@ namespace
 			{
 				// update ship orientation
 				if (lengthSquared(phys.acceleration) > 1e-10)
-					t.orientation = quat(normalize(phys.acceleration), t.orientation * vec3(0, 1, 0));
+					t.orientation = Quat(normalize(phys.acceleration), t.orientation * Vec3(0, 1, 0));
 			}
 		}
 
@@ -275,9 +275,9 @@ namespace
 		// log timing
 		if (tickIndex++ % 120 == 0)
 		{
-			CAGE_LOG(SeverityEnum::Info, "performance", stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
-			CAGE_LOG(SeverityEnum::Info, "performance", stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
-			CAGE_LOG(SeverityEnum::Info, "performance", stringizer() + "Ships interaction ratio: " + real(shipsInteractionRatio.smooth()) * 0.001);
+			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
+			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
+			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships interaction ratio: " + Real(shipsInteractionRatio.smooth()) * 0.001);
 		}
 	}
 

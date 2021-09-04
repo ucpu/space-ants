@@ -9,8 +9,8 @@ namespace
 {
 	class AutoCamera
 	{
-		VariableSmoothingBuffer<vec3, 30> a;
-		VariableSmoothingBuffer<vec3, 30> b;
+		VariableSmoothingBuffer<Vec3, 30> a;
+		VariableSmoothingBuffer<Vec3, 30> b;
 
 		void updatePositions()
 		{
@@ -41,9 +41,9 @@ namespace
 			if (cam)
 			{
 				TransformComponent &t = cam->value<TransformComponent>();
-				transform t2 = t;
+				Transform t2 = t;
 				t.position = b.smooth();
-				t.orientation = quat(a.smooth() - t.position, t.orientation * vec3(0, 1, 0));
+				t.orientation = Quat(a.smooth() - t.position, t.orientation * Vec3(0, 1, 0));
 				t = interpolate(t2, t, 0.1);
 				CameraComponent &c = cam->value<CameraComponent>();
 				c.depthOfField.focusDistance = distance(t.position, a.smooth()) * 2;
@@ -88,15 +88,15 @@ namespace
 		camera = engineEntities()->createUnique();
 		{
 			TransformComponent &t = camera->value<TransformComponent>();
-			t.position = vec3(0, 0, 200);
+			t.position = Vec3(0, 0, 200);
 			CameraComponent &c = camera->value<CameraComponent>();
 			c.cameraOrder = 2;
 			c.sceneMask = 1;
 			c.near = 1;
 			c.far = 500;
-			c.ambientColor = vec3(1);
+			c.ambientColor = Vec3(1);
 			c.ambientIntensity = 0.1;
-			c.ambientDirectionalColor = vec3(1);
+			c.ambientDirectionalColor = Vec3(1);
 			c.ambientDirectionalIntensity = 3;
 			c.clear = CameraClearFlags::None;
 			c.effects = CameraEffectsFlags::Default & ~CameraEffectsFlags::AmbientOcclusion;

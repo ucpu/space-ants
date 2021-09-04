@@ -7,7 +7,7 @@
 
 namespace
 {
-	real *propertyValues[] = {
+	Real *propertyValues[] = {
 		&shipTargetShips,
 		&shipTargetPlanets,
 		&shipSeparation,
@@ -17,7 +17,7 @@ namespace
 		&shipLaserRadius,
 	};
 
-	const string propertyNames[] = {
+	const String propertyNames[] = {
 		"Target Ships: ",
 		"Target Planets: ",
 		"Separation: ",
@@ -89,7 +89,7 @@ namespace
 				c.min.f = 0;
 				c.max.f = 0.05;
 				c.step.f = 0.0002;
-				c.value = stringizer() + *propertyValues[i];
+				c.value = Stringizer() + *propertyValues[i];
 			}
 		}
 
