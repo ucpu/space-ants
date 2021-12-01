@@ -18,16 +18,16 @@ namespace
 			{
 				Entity *ship = engineEntities()->get(shipName);
 				TransformComponent &t = ship->value<TransformComponent>();
-				::PhysicsComponent &p = (ship)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+				PhysicsComponent &p = ship->value<PhysicsComponent>();
 				a.add(t.position);
 				if (lengthSquared(p.velocity) > 1e-7)
 					b.add(t.position - normalize(p.velocity) * 5);
 			}
 			else
 			{
-				uint32 cnt = ShipComponent::component->count();
+				uint32 cnt = engineEntities()->component<ShipComponent>()->count();
 				uint32 i = randomRange(0u, cnt);
-				shipName = ShipComponent::component->entities()[i]->name();
+				shipName = engineEntities()->component<ShipComponent>()->entities()[i]->name();
 			}
 		}
 

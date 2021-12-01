@@ -12,8 +12,6 @@ using namespace cage;
 
 struct PhysicsComponent
 {
-	static EntityComponent *component;
-
 	Quat rotation;
 	Vec3 velocity;
 	Vec3 acceleration;
@@ -22,37 +20,27 @@ struct PhysicsComponent
 
 struct OwnerComponent
 {
-	static EntityComponent *component;
-
 	uint32 owner = 0;
 };
 
 struct LifeComponent
 {
-	static EntityComponent *component;
-
 	sint32 life = 0; // this used to be atomic - todo fix
 };
 
 struct ShipComponent
 {
-	static EntityComponent *component;
-
 	uint32 currentTarget = 0;
 	uint32 longtermTarget = 0;
 };
 
 struct PlanetComponent
 {
-	static EntityComponent *component;
-
 	uint32 batch = 0; // number of ships to spawn
 };
 
 struct TimeoutComponent
 {
-	static EntityComponent *component;
-
 	sint32 ttl = 1;
 };
 

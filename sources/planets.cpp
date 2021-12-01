@@ -42,16 +42,16 @@ namespace
 			t.position = randomDirection3() * randomRange(80, 150);
 			t.orientation = randomDirectionQuat();
 			t.scale = 5;
-			::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
+			OwnerComponent &owner = e->value<OwnerComponent>();
 			owner.owner = p % playersCount;
 			RenderComponent &r = e->value<RenderComponent>();
 			r.object = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
 			r.color = playerColors[owner.owner];
-			::PhysicsComponent &physics = (e)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+			PhysicsComponent &physics = e->value<PhysicsComponent>();
 			physics.rotation = interpolate(Quat(), randomDirectionQuat(), 0.0003);
-			::LifeComponent &life = (e)->value<::LifeComponent>(::LifeComponent::component);;
+			LifeComponent &life = e->value<LifeComponent>();
 			life.life = randomRange(1000000, 2000000);
-			::PlanetComponent &planet = (e)->value<::PlanetComponent>(::PlanetComponent::component);;
+			PlanetComponent &planet = e->value<PlanetComponent>();
 			planet.batch = randomRange(3 * batchScale, 5 * batchScale);
 		}
 	}
@@ -64,17 +64,17 @@ namespace
 		t.scale = 0.3;
 		t.position = planetTransform.position + randomDirection3() * (t.scale + planetTransform.scale + 1e-5);
 		t.orientation = randomDirectionQuat();
-		::OwnerComponent &planetOwner = (planet)->value<::OwnerComponent>(::OwnerComponent::component);;
-		::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
+		OwnerComponent &planetOwner = (planet)->value<OwnerComponent>();
+		OwnerComponent &owner = e->value<OwnerComponent>();
 		owner.owner = planetOwner.owner;
 		RenderComponent &planetRender = planet->value<RenderComponent>();
 		RenderComponent &r = e->value<RenderComponent>();
 		r.color = planetRender.color;
 		r.object = HashString("ants/ships/1/1.object");
-		::PhysicsComponent &physics = (e)->value<::PhysicsComponent>(::PhysicsComponent::component);;
-		::LifeComponent &life = (e)->value<::LifeComponent>(::LifeComponent::component);;
+		PhysicsComponent &physics = e->value<PhysicsComponent>();
+		LifeComponent &life = e->value<LifeComponent>();
 		life.life = randomRange(200, 300);
-		::ShipComponent &ship = (e)->value<::ShipComponent>(::ShipComponent::component);;
+		ShipComponent &ship = e->value<ShipComponent>();
 		ship.longtermTarget = target;
 	}
 
@@ -82,17 +82,17 @@ namespace
 
 	void engineUpdate()
 	{
-		uint32 shipsCount = ShipComponent::component->group()->count();
-		uint32 planetsCount = PlanetComponent::component->group()->count();
+		uint32 shipsCount = engineEntities()->component<ShipComponent>()->count();
+		uint32 planetsCount = engineEntities()->component<PlanetComponent>()->count();
 		uint32 currentIndex = 0;
-		for (Entity *e : PlanetComponent::component->entities())
+		for (Entity *e : engineEntities()->component<PlanetComponent>()->entities())
 		{
-			::PlanetComponent &p = (e)->value<::PlanetComponent>(::PlanetComponent::component);;
+			PlanetComponent &p = e->value<PlanetComponent>();
 			if (currentIndex++ != (planetIndex % planetsCount))
 				continue;
 			if (shipsCount + p.batch > shipsLimit)
 				continue;
-			::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
+			OwnerComponent &owner = e->value<OwnerComponent>();
 			uint32 target = pickTargetPlanet(owner.owner);
 			for (uint32 s = 0; s < p.batch; s++)
 				createShip(e, target);

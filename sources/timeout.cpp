@@ -22,7 +22,7 @@ namespace
 	{
 		TransformComponent &st = ship->value<TransformComponent>();
 		RenderComponent &sr = ship->value<RenderComponent>();
-		::PhysicsComponent &sp = (ship)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+		PhysicsComponent &sp = ship->value<PhysicsComponent>();
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
@@ -38,9 +38,9 @@ namespace
 			TextureAnimationComponent &at = e->value<TextureAnimationComponent>();
 			at.startTime = engineControlTime();
 			at.speed = randomRange(0.7, 1.5);
-			::PhysicsComponent &p = (e)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+			PhysicsComponent &p = e->value<PhysicsComponent>();
 			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
-			::TimeoutComponent &ttl = (e)->value<::TimeoutComponent>(::TimeoutComponent::component);;
+			TimeoutComponent &ttl = e->value<TimeoutComponent>();
 			ttl.ttl = numeric_cast<sint32>(Real(30) / at.speed);
 		}
 	}
@@ -48,21 +48,21 @@ namespace
 	void engineUpdate()
 	{
 		{
-			for (Entity *e : TimeoutComponent::component->entities())
+			for (Entity *e : engineEntities()->component<TimeoutComponent>()->entities())
 			{
-				::TimeoutComponent &t = (e)->value<::TimeoutComponent>(::TimeoutComponent::component);;
+				TimeoutComponent &t = e->value<TimeoutComponent>();
 				if (t.ttl-- <= 0)
 					e->add(entitiesToDestroy);
 			}
 		}
 		{
-			for (Entity *e : LifeComponent::component->entities())
+			for (Entity *e : engineEntities()->component<LifeComponent>()->entities())
 			{
-				::LifeComponent &l = (e)->value<::LifeComponent>(::LifeComponent::component);;
+				LifeComponent &l = e->value<LifeComponent>();
 				if (l.life <= 0)
 				{
 					e->add(entitiesToDestroy);
-					if (e->has(ShipComponent::component))
+					if (e->has<ShipComponent>())
 						shipExplode(e);
 				}
 			}

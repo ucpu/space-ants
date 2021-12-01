@@ -15,12 +15,12 @@
 
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
-	auto range = PlanetComponent::component->entities();
+	auto range = engineEntities()->component<PlanetComponent>()->entities();
 	std::vector<Entity*> planets(range.begin(), range.end());
 	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::globalRandomGenerator().next()));
 	for (Entity *e : planets)
 	{
-		::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
+		OwnerComponent &owner = e->value<OwnerComponent>();
 		if (owner.owner != shipOwner)
 			return e->name();
 	}
@@ -71,8 +71,8 @@ namespace
 		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.share());
 		EntityManager *ents = engineEntities();
 
-		auto entsArr = ShipComponent::component->entities();
-		const uint32 entsTotal = ShipComponent::component->count();
+		auto entsArr = engineEntities()->component<ShipComponent>()->entities();
+		const uint32 entsTotal = engineEntities()->component<ShipComponent>()->count();
 		const uint32 entsPerThr = entsTotal / thrCount;
 		const uint32 myStart = entsPerThr * thrIndex;
 		const uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
@@ -87,14 +87,14 @@ namespace
 			Entity *e = entsArr[entIndex];
 
 			TransformComponent &t = e->value<TransformComponent>();
-			::ShipComponent &s = (e)->value<::ShipComponent>(::ShipComponent::component);;
-			::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
-			::PhysicsComponent &phys = (e)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+			ShipComponent &s = e->value<ShipComponent>();
+			OwnerComponent &owner = e->value<OwnerComponent>();
+			PhysicsComponent &phys = e->value<PhysicsComponent>();
 
 			// destroy ships that wandered too far away
 			if (lengthSquared(t.position) > sqr(200))
 			{
-				::LifeComponent &life = (e)->value<::LifeComponent>(::LifeComponent::component);;
+				LifeComponent &life = e->value<LifeComponent>();
 				life.life = 0;
 				continue;
 			}
@@ -121,15 +121,15 @@ namespace
 					Vec3 dn = d / l;
 					phys.acceleration -= dn / sqr(max(l - t.scale - nt.scale, 1e-7)) * shipSeparation; // separation
 				}
-				if (n->has(OwnerComponent::component))
+				if (n->has<OwnerComponent>())
 				{
-					::OwnerComponent &no = (n)->value<::OwnerComponent>(::OwnerComponent::component);;
+					OwnerComponent &no = n->value<OwnerComponent>();
 					if (no.owner == owner.owner)
 					{
 						// friend
-						if (n->has(ShipComponent::component))
+						if (n->has<ShipComponent>())
 						{
-							::PhysicsComponent &np = (n)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+							PhysicsComponent &np = n->value<PhysicsComponent>();
 							avgPos += nt.position;
 							if (lengthSquared(np.velocity) > 1e-10)
 								avgDir += normalize(np.velocity);
@@ -192,8 +192,8 @@ namespace
 				if (l < shipLaserRadius + tt.scale)
 				{
 					// fire at the target
-					CAGE_ASSERT(target->has(LifeComponent::component));
-					::LifeComponent &targetLife = (target)->value<::LifeComponent>(::LifeComponent::component);;
+					CAGE_ASSERT(target->has<LifeComponent>());
+					LifeComponent &targetLife = target->value<LifeComponent>();
 					targetLife.life--;
 					Laser laser;
 					laser.tr.position = o;
@@ -226,7 +226,7 @@ namespace
 				RenderComponent &r = e->value<RenderComponent>();
 				r.object = HashString("ants/laser/laser.obj");
 				r.color = it.color;
-				::TimeoutComponent &ttl = (e)->value<::TimeoutComponent>(::TimeoutComponent::component);;
+				TimeoutComponent &ttl = e->value<TimeoutComponent>();
 				ttl.ttl = 1;
 			}
 
@@ -252,7 +252,7 @@ namespace
 		clock->reset();
 		{
 			spatialSearchData->clear();
-			for (Entity *e : PhysicsComponent::component->entities())
+			for (Entity *e : engineEntities()->component<PhysicsComponent>()->entities())
 			{
 				if (e->name() == 0)
 					continue;

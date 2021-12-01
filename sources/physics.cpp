@@ -4,10 +4,10 @@ namespace
 {
 	void engineUpdate()
 	{
-		for (Entity *e : PhysicsComponent::component->entities())
+		for (Entity *e : engineEntities()->component<PhysicsComponent>()->entities())
 		{
 			TransformComponent &t = e->value<TransformComponent>();
-			::PhysicsComponent &p = (e)->value<::PhysicsComponent>(::PhysicsComponent::component);;
+			PhysicsComponent &p = e->value<PhysicsComponent>();
 			CAGE_ASSERT(p.acceleration.valid() && p.velocity.valid() && t.position.valid());
 			CAGE_ASSERT(p.rotation.valid() && t.orientation.valid());
 			p.velocity += p.acceleration;
