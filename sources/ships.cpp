@@ -20,7 +20,7 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::globalRandomGenerator().next()));
 	for (Entity *e : planets)
 	{
-		ANTS_COMPONENT(Owner, owner, e);
+		::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
 		if (owner.owner != shipOwner)
 			return e->name();
 	}
@@ -87,14 +87,14 @@ namespace
 			Entity *e = entsArr[entIndex];
 
 			TransformComponent &t = e->value<TransformComponent>();
-			ANTS_COMPONENT(Ship, s, e);
-			ANTS_COMPONENT(Owner, owner, e);
-			ANTS_COMPONENT(Physics, phys, e);
+			::ShipComponent &s = (e)->value<::ShipComponent>(::ShipComponent::component);;
+			::OwnerComponent &owner = (e)->value<::OwnerComponent>(::OwnerComponent::component);;
+			::PhysicsComponent &phys = (e)->value<::PhysicsComponent>(::PhysicsComponent::component);;
 
 			// destroy ships that wandered too far away
 			if (lengthSquared(t.position) > sqr(200))
 			{
-				ANTS_COMPONENT(Life, life, e);
+				::LifeComponent &life = (e)->value<::LifeComponent>(::LifeComponent::component);;
 				life.life = 0;
 				continue;
 			}
@@ -123,13 +123,13 @@ namespace
 				}
 				if (n->has(OwnerComponent::component))
 				{
-					ANTS_COMPONENT(Owner, no, n);
+					::OwnerComponent &no = (n)->value<::OwnerComponent>(::OwnerComponent::component);;
 					if (no.owner == owner.owner)
 					{
 						// friend
 						if (n->has(ShipComponent::component))
 						{
-							ANTS_COMPONENT(Physics, np, n);
+							::PhysicsComponent &np = (n)->value<::PhysicsComponent>(::PhysicsComponent::component);;
 							avgPos += nt.position;
 							if (lengthSquared(np.velocity) > 1e-10)
 								avgDir += normalize(np.velocity);
@@ -193,7 +193,7 @@ namespace
 				{
 					// fire at the target
 					CAGE_ASSERT(target->has(LifeComponent::component));
-					ANTS_COMPONENT(Life, targetLife, target);
+					::LifeComponent &targetLife = (target)->value<::LifeComponent>(::LifeComponent::component);;
 					targetLife.life--;
 					Laser laser;
 					laser.tr.position = o;
@@ -226,7 +226,7 @@ namespace
 				RenderComponent &r = e->value<RenderComponent>();
 				r.object = HashString("ants/laser/laser.obj");
 				r.color = it.color;
-				ANTS_COMPONENT(Timeout, ttl, e);
+				::TimeoutComponent &ttl = (e)->value<::TimeoutComponent>(::TimeoutComponent::component);;
 				ttl.ttl = 1;
 			}
 

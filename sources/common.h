@@ -58,8 +58,6 @@ struct TimeoutComponent
 
 extern EntityGroup *entitiesToDestroy;
 
-#define ANTS_COMPONENT(T,C,E) ::T##Component &C = (E)->value<::T##Component>(::T##Component::component);
-
 uint32 pickTargetPlanet(uint32 shipOwner);
 
 extern Real shipSeparation;

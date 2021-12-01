@@ -18,7 +18,7 @@ namespace
 			{
 				Entity *ship = engineEntities()->get(shipName);
 				TransformComponent &t = ship->value<TransformComponent>();
-				ANTS_COMPONENT(Physics, p, ship);
+				::PhysicsComponent &p = (ship)->value<::PhysicsComponent>(::PhysicsComponent::component);;
 				a.add(t.position);
 				if (lengthSquared(p.velocity) > 1e-7)
 					b.add(t.position - normalize(p.velocity) * 5);
