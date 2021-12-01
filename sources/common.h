@@ -3,7 +3,8 @@
 
 #include <cage-core/math.h>
 #include <cage-core/entities.h>
-#include <cage-engine/engine.h>
+#include <cage-engine/scene.h>
+#include <cage-simple/engine.h>
 
 #include <atomic>
 

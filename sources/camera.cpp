@@ -2,7 +2,7 @@
 
 #include <cage-core/hashString.h>
 #include <cage-core/variableSmoothingBuffer.h>
-#include <cage-engine/fpsCamera.h>
+#include <cage-simple/fpsCamera.h>
 #include <cage-engine/window.h>
 
 namespace
@@ -58,11 +58,11 @@ namespace
 	Entity *objectSkybox;
 	Holder<FpsCamera> manualCamera;
 	AutoCamera autoCamera;
-	EventListener<void(uint32, ModifiersFlags)> keyPressListener;
+	InputListener<InputClassEnum::KeyPress, InputKey> keyPressListener;
 
-	void keyPress(uint32 key, ModifiersFlags)
+	void keyPress(InputKey in)
 	{
-		if (key == 32)
+		if (in.key == 32)
 		{
 			CameraComponent &c = camera->value<CameraComponent>();
 			if (autoCamera.cam)
@@ -123,7 +123,7 @@ namespace
 		manualCamera->freeMove = true;
 		manualCamera->mouseButton = MouseButtonsFlags::Left;
 		manualCamera->movementSpeed = 3;
-		keyPressListener.attach(engineWindow()->events.keyPress);
+		keyPressListener.attach(engineWindow()->events);
 		keyPressListener.bind<&keyPress>();
 	}
 

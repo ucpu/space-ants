@@ -10,7 +10,7 @@ add_subdirectory(externals/cage)
 
 file(GLOB_RECURSE space-ants-sources "sources/*")
 add_executable(space-ants ${space-ants-sources})
-target_link_libraries(space-ants cage-engine)
+target_link_libraries(space-ants cage-simple)
 cage_ide_category(space-ants space-ants)
 cage_ide_sort_files(space-ants)
 cage_ide_working_dir_in_place(space-ants)

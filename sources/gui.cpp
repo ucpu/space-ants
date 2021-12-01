@@ -1,7 +1,8 @@
 #include "common.h"
 
 #include <cage-core/string.h>
-#include <cage-engine/gui.h>
+#include <cage-engine/guiComponents.h>
+#include <cage-engine/guiManager.h>
 
 #include <initializer_list>
 
@@ -32,14 +33,14 @@ namespace
 		// nothing
 	}
 
-	EventListener<void(uint32)> guiListener;
+	InputListener<InputClassEnum::GuiWidget, InputGuiWidget> guiListener;
 
-	void guiEvent(uint32 name)
+	void guiEvent(InputGuiWidget in)
 	{
-		uint32 index = name - 20;
+		uint32 index = in.widget - 20;
 		if (index < sizeof(propertyValues) / sizeof(propertyValues[0]))
 		{
-			Entity *e = engineGui()->entities()->get(name);
+			Entity *e = engineGuiEntities()->get(in.widget);
 			GuiInputComponent &input = e->value<GuiInputComponent>();
 			if (input.valid)
 				*propertyValues[index] = toFloat(input.value);
@@ -48,7 +49,7 @@ namespace
 
 	void engineInitialize()
 	{
-		Gui *g = cage::engineGui();
+		GuiManager *g = engineGuiManager();
 		guiListener.attach(g->widgetEvent);
 		guiListener.bind<&guiEvent>();
 
