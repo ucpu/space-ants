@@ -7,7 +7,7 @@
 
 namespace
 {
-	const uint32 modelNames[] = {
+	constexpr const uint32 modelNames[] = {
 		HashString("ants/planets/farcodev/0.object"),
 		HashString("ants/planets/farcodev/1.object"),
 		HashString("ants/planets/farcodev/2.object"),

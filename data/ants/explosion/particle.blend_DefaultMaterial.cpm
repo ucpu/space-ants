@@ -11,4 +11,5 @@ albedo = particle/burn_$$.png
 noLighting
 noShadowCast
 twoSided
+alphaClip
 

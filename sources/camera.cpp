@@ -87,8 +87,7 @@ namespace
 	{
 		camera = engineEntities()->createUnique();
 		{
-			TransformComponent &t = camera->value<TransformComponent>();
-			t.position = Vec3(0, 0, 200);
+			camera->value<TransformComponent>().position = Vec3(0, 0, 200);
 			CameraComponent &c = camera->value<CameraComponent>();
 			c.cameraOrder = 2;
 			c.sceneMask = 1;
@@ -100,21 +99,20 @@ namespace
 			c.ambientDirectionalIntensity = 3;
 			c.clear = CameraClearFlags::None;
 			c.effects = CameraEffectsFlags::Default & ~CameraEffectsFlags::AmbientOcclusion;
-			ListenerComponent &ls = camera->value<ListenerComponent>();
+			camera->value<ListenerComponent>();
 		}
 		cameraSkybox = engineEntities()->createUnique();
 		{
-			TransformComponent &t = cameraSkybox->value<TransformComponent>();
+			cameraSkybox->value<TransformComponent>();
 			CameraComponent &c = cameraSkybox->value<CameraComponent>();
 			c.cameraOrder = 1;
 			c.sceneMask = 2;
 			c.near = 0.1;
 			c.far = 100;
-			c.effects |= CameraEffectsFlags::MotionBlur;
 		}
 		objectSkybox = engineEntities()->createUnique();
 		{
-			TransformComponent &t = objectSkybox->value<TransformComponent>();
+			objectSkybox->value<TransformComponent>();
 			RenderComponent &r = objectSkybox->value<RenderComponent>();
 			r.object = HashString("ants/skybox/skybox.object");
 			r.sceneMask = 2;

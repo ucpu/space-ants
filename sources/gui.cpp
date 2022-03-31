@@ -8,7 +8,7 @@
 
 namespace
 {
-	Real *propertyValues[] = {
+	constexpr Real *propertyValues[] = {
 		&shipTargetShips,
 		&shipTargetPlanets,
 		&shipSeparation,
@@ -18,7 +18,7 @@ namespace
 		&shipLaserRadius,
 	};
 
-	const String propertyNames[] = {
+	constexpr const String propertyNames[] = {
 		"Target Ships: ",
 		"Target Planets: ",
 		"Separation: ",

@@ -6,7 +6,6 @@ skybox.pack
 []
 scheme = model
 normals = false
-
 skybox.obj
 
 []
