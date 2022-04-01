@@ -1,27 +1,28 @@
 #include "common.h"
 
 #include <cage-core/random.h>
-#include <cage-core/spatialStructure.h>
 #include <cage-core/geometry.h>
-#include <cage-core/threadPool.h>
+#include <cage-core/spatialStructure.h>
+#include <cage-core/entitiesVisitor.h>
 #include <cage-core/concurrent.h>
 #include <cage-core/hashString.h>
 #include <cage-core/timer.h>
 #include <cage-core/variableSmoothingBuffer.h>
+#include <cage-core/tasks.h>
 
+#include <random>
 #include <vector>
 #include <algorithm>
-#include <random>
+#include <atomic>
 
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
-	auto range = engineEntities()->component<PlanetComponent>()->entities();
-	std::vector<Entity*> planets(range.begin(), range.end());
+	const auto &range = engineEntities()->component<PlanetComponent>()->entities();
+	std::vector<Entity *> planets(range.begin(), range.end());
 	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::globalRandomGenerator().next()));
 	for (Entity *e : planets)
 	{
-		OwnerComponent &owner = e->value<OwnerComponent>();
-		if (owner.owner != shipOwner)
+		if (e->value<OwnerComponent>().owner != shipOwner)
 			return e->name();
 	}
 	return 0;
@@ -37,100 +38,74 @@ Real shipLaserRadius = 2;
 
 namespace
 {
-	Holder<SpatialStructure> initSpatialData()
-	{
-		SpatialStructureCreateConfig cfg;
-		return newSpatialStructure(cfg);
-	}
-
-	Holder<ThreadPool> initThreadPool();
-
-	Holder<SpatialStructure> spatialSearchData = initSpatialData();
-	Holder<ThreadPool> threads = initThreadPool();
-	Holder<Mutex> mutex = newMutex();
+	Holder<SpatialStructure> spatialSearchData = newSpatialStructure({});
 
 	uint32 tickIndex = 1;
 	Holder<Timer> clock = newTimer();
 	VariableSmoothingBuffer<uint64, 512> smoothTimeSpatialBuild;
 	VariableSmoothingBuffer<uint64, 512> smoothTimeShipsUpdate;
-	VariableSmoothingBuffer<uint32, 2048> shipsInteractionRatio;
+	VariableSmoothingBuffer<uint64, 512> shipsInteractionRatio;
 
-	Vec3 front(const Transform &t)
+	struct ShipUpdater
 	{
-		return t.position + t.orientation * Vec3(0, 0, -1) * t.scale;
-	}
+		Entity *e = nullptr;
+		TransformComponent &t;
+		ShipComponent &s;
+		OwnerComponent &owner;
+		PhysicsComponent &phys;
+		LifeComponent &life;
 
-	struct Laser
-	{
-		Transform tr;
-		Vec3 color;
-	};
+		static inline Holder<Mutex> mutex = newMutex();
+		static inline std::atomic<uint32> shipsInteracted = 0;
 
-	void shipsUpdateEntry(uint32 thrIndex, uint32 thrCount)
-	{
-		Holder<SpatialQuery> SpatialQuery = newSpatialQuery(spatialSearchData.share());
-		EntityManager *ents = engineEntities();
-
-		auto entsArr = engineEntities()->component<ShipComponent>()->entities();
-		const uint32 entsTotal = engineEntities()->component<ShipComponent>()->count();
-		const uint32 entsPerThr = entsTotal / thrCount;
-		const uint32 myStart = entsPerThr * thrIndex;
-		const uint32 myEnd = thrIndex + 1 == thrCount ? entsTotal : myStart + entsPerThr;
-
-		std::vector<Laser> shots;
-		shots.reserve(myEnd - myStart);
-
-		uint32 shipsInteracted = 0;
-
-		for (uint32 entIndex = myStart; entIndex != myEnd; entIndex++)
+		static Vec3 front(const Transform &t)
 		{
-			Entity *e = entsArr[entIndex];
+			return t.position + t.orientation * Vec3(0, 0, -1) * t.scale;
+		}
 
-			TransformComponent &t = e->value<TransformComponent>();
-			ShipComponent &s = e->value<ShipComponent>();
-			OwnerComponent &owner = e->value<OwnerComponent>();
-			PhysicsComponent &phys = e->value<PhysicsComponent>();
+		void operator () ()
+		{
+			thread_local Holder<SpatialQuery> spatialQuery = newSpatialQuery(spatialSearchData.share());
 
 			// destroy ships that wandered too far away
 			if (lengthSquared(t.position) > sqr(200))
 			{
-				LifeComponent &life = e->value<LifeComponent>();
 				life.life = 0;
-				continue;
+				return;
 			}
 
 			// find all nearby objects
-			SpatialQuery->intersection(Sphere(t.position, t.scale + shipDetectRadius));
-			uint32 myName = e->name();
+			spatialQuery->intersection(Sphere(t.position, t.scale + shipDetectRadius));
+			shipsInteracted += numeric_cast<uint32>(spatialQuery->result().size());
+			const uint32 myName = e->name();
 			Vec3 avgPos;
 			Vec3 avgDir;
 			uint32 avgCnt = 0;
 			uint32 closestTargetName = 0;
 			Real closestTargetDistance = Real::Infinity();
-			shipsInteracted += numeric_cast<uint32>(SpatialQuery->result().size());
-			for (uint32 nearbyName : SpatialQuery->result())
+			for (uint32 nearbyName : spatialQuery->result())
 			{
 				if (nearbyName == myName)
 					continue;
-				Entity *n = ents->get(nearbyName);
-				TransformComponent &nt = n->value<TransformComponent>();
+				Entity *n = engineEntities()->get(nearbyName);
+				const TransformComponent &nt = n->value<TransformComponent>();
 				Vec3 d = nt.position - t.position;
 				Real l = length(d);
 				if (l > 1e-7)
 				{
-					Vec3 dn = d / l;
+					const Vec3 dn = d / l;
 					phys.acceleration -= dn / sqr(max(l - t.scale - nt.scale, 1e-7)) * shipSeparation; // separation
 				}
 				if (n->has<OwnerComponent>())
 				{
-					OwnerComponent &no = n->value<OwnerComponent>();
+					const OwnerComponent &no = n->value<OwnerComponent>();
 					if (no.owner == owner.owner)
 					{
 						// friend
 						if (n->has<ShipComponent>())
 						{
-							PhysicsComponent &np = n->value<PhysicsComponent>();
 							avgPos += nt.position;
+							const PhysicsComponent &np = n->value<PhysicsComponent>();
 							if (lengthSquared(np.velocity) > 1e-10)
 								avgDir += normalize(np.velocity);
 							avgCnt++;
@@ -158,50 +133,52 @@ namespace
 
 			// choose a target to follow
 			uint32 targetName = 0;
-			if (ents->has(s.currentTarget))
+			if (engineEntities()->has(s.currentTarget))
 				targetName = s.currentTarget;
 			else if (closestTargetName)
 				targetName = s.currentTarget = closestTargetName;
 			else
 			{
 				// use long-term goal
-				if (!ents->has(s.longtermTarget))
+				if (!engineEntities()->has(s.longtermTarget))
 					s.longtermTarget = pickTargetPlanet(owner.owner);
 				targetName = s.longtermTarget;
 			}
 
 			// accelerate towards target
-			if (ents->has(targetName))
+			if (engineEntities()->has(targetName))
 			{
-				Entity *target = ents->get(targetName);
-				TransformComponent &targetTransform = target->value<TransformComponent>();
-				Vec3 f = targetTransform.position - t.position;
-				Real l = length(f) - t.scale - targetTransform.scale;
+				Entity *target = engineEntities()->get(targetName);
+				const TransformComponent &targetTransform = target->value<TransformComponent>();
+				const Vec3 f = targetTransform.position - t.position;
+				const Real l = length(f) - t.scale - targetTransform.scale;
 				if (l > 1e-7)
 					phys.acceleration += normalize(f) * shipTargetShips;
 			}
 
 			// fire at closest enemy
-			if (ents->has(closestTargetName))
+			if (engineEntities()->has(closestTargetName))
 			{
-				Entity *target = ents->get(closestTargetName);
-				TransformComponent &tt = target->value<TransformComponent>();
-				Vec3 o = front(t);
-				Vec3 d = tt.position - o;
-				Real l = length(d);
+				Entity *target = engineEntities()->get(closestTargetName);
+				const TransformComponent &tt = target->value<TransformComponent>();
+				const Vec3 o = front(t);
+				const Vec3 d = tt.position - o;
+				const Real l = length(d);
 				if (l < shipLaserRadius + tt.scale)
 				{
 					// fire at the target
+					ScopeLock<Mutex> lock(mutex);
 					CAGE_ASSERT(target->has<LifeComponent>());
-					LifeComponent &targetLife = target->value<LifeComponent>();
-					targetLife.life--;
-					Laser laser;
-					laser.tr.position = o;
-					laser.tr.orientation = Quat(d, Vec3(0, 1, 0));
-					laser.tr.scale = l;
-					RenderComponent &render = e->value<RenderComponent>();
-					laser.color = render.color;
-					shots.push_back(laser);
+					target->value<LifeComponent>().life--;
+					Entity *laser = engineEntities()->createAnonymous();
+					TransformComponent &tr = laser->value<TransformComponent>();
+					tr.position = o;
+					tr.orientation = Quat(d, Vec3(0, 1, 0));
+					tr.scale = l;
+					RenderComponent &r = laser->value<RenderComponent>();
+					r.object = HashString("ants/laser/laser.obj");
+					r.color = e->value<RenderComponent>().color;
+					laser->value<TimeoutComponent>().ttl = 1;
 				}
 			}
 
@@ -213,62 +190,32 @@ namespace
 					t.orientation = Quat(normalize(phys.acceleration), t.orientation * Vec3(0, 1, 0));
 			}
 		}
-
-		{
-			ScopeLock<Mutex> lock(mutex);
-
-			// generate lasers
-			for (auto &it : shots)
-			{
-				Entity *e = ents->createAnonymous();
-				TransformComponent &t = e->value<TransformComponent>();
-				t = it.tr;
-				RenderComponent &r = e->value<RenderComponent>();
-				r.object = HashString("ants/laser/laser.obj");
-				r.color = it.color;
-				TimeoutComponent &ttl = e->value<TimeoutComponent>();
-				ttl.ttl = 1;
-			}
-
-			// stats
-			{
-				uint32 cnt = myEnd - myStart;
-				if (cnt > 0)
-					shipsInteractionRatio.add(1000 * shipsInteracted / cnt);
-			}
-		}
-	}
-
-	Holder<ThreadPool> initThreadPool()
-	{
-		auto thrs = newThreadPool("ships ", processorsCount() - 1);
-		thrs->function.bind<&shipsUpdateEntry>();
-		return thrs;
-	}
+	};
 
 	void engineUpdate()
 	{
 		// add all physics objects into spatial data
 		clock->reset();
-		{
-			spatialSearchData->clear();
-			for (Entity *e : engineEntities()->component<PhysicsComponent>()->entities())
-			{
-				if (e->name() == 0)
-					continue;
-				TransformComponent &t = e->value<TransformComponent>();
+		spatialSearchData->clear();
+		entitiesVisitor([&](Entity *e, const PhysicsComponent &, const TransformComponent &t) {
+			if (e->name())
 				spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
-			}
-		}
-		{
-			spatialSearchData->rebuild();
-		}
+		}, engineEntities(), false);
+		spatialSearchData->rebuild();
 		smoothTimeSpatialBuild.add(clock->elapsed());
 
 		// update ships
 		clock->reset();
 		{
-			threads->run();
+			std::vector<ShipUpdater> ships;
+			ships.reserve(10000);
+			entitiesVisitor([&](Entity *e, TransformComponent &t, ShipComponent &s, OwnerComponent &owner, PhysicsComponent &phys, LifeComponent &life) {
+				ships.push_back({ e, t, s, owner, phys, life });
+			}, engineEntities(), false);
+			tasksRunBlocking<ShipUpdater, 32>("update ships", ships);
+			if (!ships.empty())
+				shipsInteractionRatio.add(1000 * uint64(ShipUpdater::shipsInteracted) / ships.size());
+			ShipUpdater::shipsInteracted = 0;
 		}
 		smoothTimeShipsUpdate.add(clock->elapsed());
 
