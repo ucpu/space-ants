@@ -54,8 +54,6 @@ namespace
 	};
 
 	Entity *camera;
-	Entity *cameraSkybox;
-	Entity *objectSkybox;
 	Holder<FpsCamera> manualCamera;
 	AutoCamera autoCamera;
 	InputListener<InputClassEnum::KeyPress, InputKey> keyPressListener;
@@ -89,33 +87,19 @@ namespace
 		{
 			camera->value<TransformComponent>().position = Vec3(0, 0, 200);
 			CameraComponent &c = camera->value<CameraComponent>();
-			c.cameraOrder = 2;
-			c.sceneMask = 1;
 			c.near = 1;
 			c.far = 500;
 			c.ambientColor = Vec3(1);
 			c.ambientIntensity = 0.1;
 			c.ambientDirectionalColor = Vec3(1);
 			c.ambientDirectionalIntensity = 3;
-			c.clear = CameraClearFlags::None;
 			c.effects = CameraEffectsFlags::Default & ~CameraEffectsFlags::AmbientOcclusion;
 			camera->value<ListenerComponent>();
 		}
-		cameraSkybox = engineEntities()->createUnique();
 		{
-			cameraSkybox->value<TransformComponent>();
-			CameraComponent &c = cameraSkybox->value<CameraComponent>();
-			c.cameraOrder = 1;
-			c.sceneMask = 2;
-			c.near = 0.1;
-			c.far = 100;
-		}
-		objectSkybox = engineEntities()->createUnique();
-		{
-			objectSkybox->value<TransformComponent>();
-			RenderComponent &r = objectSkybox->value<RenderComponent>();
-			r.object = HashString("ants/skybox/skybox.object");
-			r.sceneMask = 2;
+			Entity *skybox = engineEntities()->createUnique();
+			skybox->value<TransformComponent>();
+			skybox->value<RenderComponent>().object = HashString("ants/skybox/skybox.object");
 		}
 		manualCamera = newFpsCamera(camera);
 		manualCamera->freeMove = true;
@@ -127,9 +111,6 @@ namespace
 
 	void engineUpdate()
 	{
-		TransformComponent &tc = camera->value<TransformComponent>();
-		TransformComponent &ts = cameraSkybox->value<TransformComponent>();
-		ts.orientation = tc.orientation;
 		autoCamera.update();
 	}
 
