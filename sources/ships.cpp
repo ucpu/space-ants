@@ -19,7 +19,7 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 {
 	const auto &range = engineEntities()->component<PlanetComponent>()->entities();
 	std::vector<Entity *> planets(range.begin(), range.end());
-	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::globalRandomGenerator().next()));
+	std::shuffle(planets.begin(), planets.end(), std::default_random_engine((unsigned)detail::randomGenerator().next()));
 	for (Entity *e : planets)
 	{
 		if (e->value<OwnerComponent>().owner != shipOwner)
