@@ -12,7 +12,7 @@ skybox.obj
 []
 scheme = texture
 target = cubeMap
-convert = skyboxToCube
+skyboxToCube = true
 srgb = true
 skybox.png
 
