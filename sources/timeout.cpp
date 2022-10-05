@@ -48,6 +48,7 @@ namespace
 	void engineUpdate()
 	{
 		{
+			ProfilingScope profiling("timeout");
 			for (Entity *e : engineEntities()->component<TimeoutComponent>()->entities())
 			{
 				TimeoutComponent &t = e->value<TimeoutComponent>();
@@ -56,6 +57,7 @@ namespace
 			}
 		}
 		{
+			ProfilingScope profiling("explosions");
 			for (Entity *e : engineEntities()->component<LifeComponent>()->entities())
 			{
 				LifeComponent &l = e->value<LifeComponent>();

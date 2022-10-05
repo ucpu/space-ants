@@ -194,19 +194,26 @@ namespace
 
 	void engineUpdate()
 	{
+		ProfilingScope profilingTop("ships");
+		profilingTop.set(Stringizer() + "count: " + engineEntities()->component<ShipComponent>()->count());
+
 		// add all physics objects into spatial data
 		clock->reset();
-		spatialSearchData->clear();
-		entitiesVisitor([&](Entity *e, const PhysicsComponent &, const TransformComponent &t) {
-			if (e->name())
-				spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
-		}, engineEntities(), false);
-		spatialSearchData->rebuild();
+		{
+			ProfilingScope profiling("spatial data");
+			spatialSearchData->clear();
+			entitiesVisitor([&](Entity *e, const PhysicsComponent &, const TransformComponent &t) {
+				if (e->name())
+					spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
+				}, engineEntities(), false);
+			spatialSearchData->rebuild();
+		}
 		smoothTimeSpatialBuild.add(clock->elapsed());
 
 		// update ships
 		clock->reset();
 		{
+			ProfilingScope profiling("update");
 			std::vector<ShipUpdater> ships;
 			ships.reserve(10000);
 			entitiesVisitor([&](Entity *e, TransformComponent &t, ShipComponent &s, OwnerComponent &owner, PhysicsComponent &phys, LifeComponent &life) {

@@ -4,6 +4,7 @@ namespace
 {
 	void engineUpdate()
 	{
+		ProfilingScope profiling("physics");
 		for (Entity *e : engineEntities()->component<PhysicsComponent>()->entities())
 		{
 			TransformComponent &t = e->value<TransformComponent>();
