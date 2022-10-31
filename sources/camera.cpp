@@ -4,6 +4,7 @@
 #include <cage-core/variableSmoothingBuffer.h>
 #include <cage-simple/fpsCamera.h>
 #include <cage-engine/window.h>
+#include <cage-engine/sceneScreenSpaceEffects.h>
 
 namespace
 {
@@ -45,7 +46,7 @@ namespace
 				t.position = b.smooth();
 				t.orientation = Quat(a.smooth() - t.position, t.orientation * Vec3(0, 1, 0));
 				t = interpolate(t2, t, 0.1);
-				CameraComponent &c = cam->value<CameraComponent>();
+				ScreenSpaceEffectsComponent &c = cam->value<ScreenSpaceEffectsComponent>();
 				c.depthOfField.focusDistance = distance(t.position, a.smooth()) * 2;
 				c.depthOfField.blendRadius = c.depthOfField.focusDistance * 2;
 				c.depthOfField.focusRadius = 0;
@@ -62,21 +63,21 @@ namespace
 	{
 		if (in.key == 32)
 		{
-			CameraComponent &c = camera->value<CameraComponent>();
+			ScreenSpaceEffectsComponent &c = camera->value<ScreenSpaceEffectsComponent>();
 			if (autoCamera.cam)
 			{
 				// switch to manual
 				autoCamera.cam = nullptr;
 				manualCamera->setEntity(camera);
 				autoCamera.shipName = 0;
-				c.effects &= ~CameraEffectsFlags::DepthOfField;
+				c.effects &= ~ScreenSpaceEffectsFlags::DepthOfField;
 			}
 			else
 			{
 				// switch to auto
 				autoCamera.cam = camera;
 				manualCamera->setEntity(nullptr);
-				c.effects |= CameraEffectsFlags::DepthOfField;
+				c.effects |= ScreenSpaceEffectsFlags::DepthOfField;
 			}
 		}
 	}
@@ -93,7 +94,7 @@ namespace
 			c.ambientIntensity = 0.1;
 			c.ambientDirectionalColor = Vec3(1);
 			c.ambientDirectionalIntensity = 3;
-			c.effects = CameraEffectsFlags::Default & ~CameraEffectsFlags::AmbientOcclusion;
+			camera->value<ScreenSpaceEffectsComponent>().effects = ScreenSpaceEffectsFlags::Default & ~ScreenSpaceEffectsFlags::AmbientOcclusion;
 			camera->value<ListenerComponent>();
 		}
 		{
