@@ -92,8 +92,11 @@ namespace
 			c.far = 500;
 			c.ambientColor = Vec3(1);
 			c.ambientIntensity = 0.1;
-			c.ambientDirectionalColor = Vec3(1);
-			c.ambientDirectionalIntensity = 3;
+			LightComponent &l = camera->value<LightComponent>();
+			l.lightType = LightTypeEnum::Directional;
+			l.color = Vec3(1);
+			l.intensity = 3;
+			l.ssaoFactor = 1;
 			camera->value<ScreenSpaceEffectsComponent>().effects = ScreenSpaceEffectsFlags::Default & ~ScreenSpaceEffectsFlags::AmbientOcclusion;
 			camera->value<ListenerComponent>();
 		}
