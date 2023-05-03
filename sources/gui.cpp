@@ -1,8 +1,8 @@
 #include "common.h"
 
 #include <cage-core/string.h>
-#include <cage-engine/guiComponents.h>
 #include <cage-engine/guiManager.h>
+#include <cage-engine/guiBuilder.h>
 
 #include <initializer_list>
 
@@ -49,55 +49,26 @@ namespace
 
 	void engineInitialize()
 	{
-		GuiManager *g = engineGuiManager();
-		guiListener.attach(g->widgetEvent);
+		Holder<GuiBuilder> g = newGuiBuilder(engineGuiEntities());
+
+		guiListener.attach(engineGuiManager()->widgetEvent);
 		guiListener.bind<&guiEvent>();
 
-		Entity *topLeft = g->entities()->createUnique();
-		{
-			GuiScrollbarsComponent &sc = topLeft->value<GuiScrollbarsComponent>();
-		}
-
-		Entity *table = g->entities()->createUnique();
-		{
-			GuiSpoilerComponent &c = table->value<GuiSpoilerComponent>();
-			GuiLayoutTableComponent &l = table->value<GuiLayoutTableComponent>();
-			GuiParentComponent &child = table->value<GuiParentComponent>();
-			child.parent = topLeft->name();
-			GuiTextComponent &t = table->value<GuiTextComponent>();
-			t.value = "Ships";
-		}
+		auto _1 = g->alignment(Vec2());
+		auto _2 = g->spoiler().text("Ships");
+		auto _3 = g->verticalTable(2);
 
 		static_assert(sizeof(propertyNames) / sizeof(propertyNames[0]) == sizeof(propertyValues) / sizeof(propertyValues[0]), "arrays must have same length");
 		for (uint32 i = 0; i < sizeof(propertyNames) / sizeof(propertyNames[0]); i++)
 		{
-			Entity *lab = g->entities()->createUnique();
-			{
-				GuiParentComponent &child = lab->value<GuiParentComponent>();
-				child.parent = table->name();
-				child.order = i * 2 + 0;
-				GuiLabelComponent &c = lab->value<GuiLabelComponent>();
-				GuiTextComponent &t = lab->value<GuiTextComponent>();
-				t.value = propertyNames[i];
-			}
-			Entity *con = g->entities()->create(20 + i);
-			{
-				GuiParentComponent &child = con->value<GuiParentComponent>();
-				child.parent = table->name();
-				child.order = i * 2 + 1;
-				GuiInputComponent &c = con->value<GuiInputComponent>();
-				c.type = InputTypeEnum::Real;
-				c.min.f = 0;
-				c.max.f = 0.05;
-				c.step.f = 0.0002;
-				c.value = Stringizer() + *propertyValues[i];
-			}
+			g->label().text(propertyNames[i]);
+			g->setNextName(20 + i).input(*propertyValues[i], 0, 0.05, 0.0002);
 		}
 
 		for (uint32 i : { 5, 6 })
 		{
 			// radiuses
-			GuiInputComponent &c = g->entities()->get(20 + i)->value<GuiInputComponent>();
+			GuiInputComponent &c = engineGuiEntities()->get(20 + i)->value<GuiInputComponent>();
 			c.min.f = 0.1;
 			c.max.f = 10.0;
 			c.step.f = 0.1;
