@@ -2,8 +2,7 @@
 
 namespace
 {
-	void engineUpdate()
-	{
+	const auto engineUpdateListener = controlThread().update.listen([]() {
 		ProfilingScope profiling("physics");
 		for (Entity *e : engineEntities()->component<PhysicsComponent>()->entities())
 		{
@@ -18,16 +17,5 @@ namespace
 			t.position += p.velocity;
 			t.orientation = p.rotation * t.orientation;
 		}
-	}
-
-	class Callbacks
-	{
-		EventListener<void()> engineUpdateListener;
-	public:
-		Callbacks()
-		{
-			engineUpdateListener.attach(controlThread().update, 100);
-			engineUpdateListener.bind<&engineUpdate>();
-		}
-	} callbacksInstance;
+	}, 100);
 }

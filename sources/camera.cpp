@@ -57,7 +57,7 @@ namespace
 	Entity *camera;
 	Holder<FpsCamera> manualCamera;
 	AutoCamera autoCamera;
-	InputListener<InputClassEnum::KeyPress, InputKey> keyPressListener;
+	EventListener<bool(const GenericInput &)> keyPressListener;
 
 	void keyPress(InputKey in)
 	{
@@ -82,8 +82,7 @@ namespace
 		}
 	}
 
-	void engineInitialize()
-	{
+	const auto engineInitListener = controlThread().initialize.listen([]() {
 		camera = engineEntities()->createUnique();
 		{
 			camera->value<TransformComponent>().position = Vec3(0, 0, 200);
@@ -110,25 +109,10 @@ namespace
 		manualCamera->mouseButton = MouseButtonsFlags::Left;
 		manualCamera->movementSpeed = 3;
 		keyPressListener.attach(engineWindow()->events);
-		keyPressListener.bind<&keyPress>();
-	}
+		keyPressListener.bind(inputListener<InputClassEnum::KeyPress, InputKey>(&keyPress));
+	}, -200);
 
-	void engineUpdate()
-	{
+	const auto engineUpdateListener = controlThread().update.listen([]() {
 		autoCamera.update();
-	}
-
-	class Callbacks
-	{
-		EventListener<void()> engineInitListener;
-		EventListener<void()> engineUpdateListener;
-	public:
-		Callbacks()
-		{
-			engineInitListener.attach(controlThread().initialize, -200);
-			engineInitListener.bind<&engineInitialize>();
-			engineUpdateListener.attach(controlThread().update, 200);
-			engineUpdateListener.bind<&engineUpdate>();
-		}
-	} callbacksInstance;
+	}, 200);
 }

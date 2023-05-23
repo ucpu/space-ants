@@ -45,8 +45,7 @@ namespace
 		}
 	}
 
-	void engineUpdate()
-	{
+	const auto engineUpdateListener = controlThread().update.listen([]() {
 		{
 			ProfilingScope profiling("timeout");
 			for (Entity *e : engineEntities()->component<TimeoutComponent>()->entities())
@@ -72,24 +71,9 @@ namespace
 		{
 			entitiesToDestroy->destroy();
 		}
-	}
+	}, 90);
 
-	void engineInitialize()
-	{
+	const auto engineInitListener = controlThread().initialize.listen([]() {
 		entitiesToDestroy = engineEntities()->defineGroup();
-	}
-
-	class Callbacks
-	{
-		EventListener<void()> engineInitListener;
-		EventListener<void()> engineUpdateListener;
-	public:
-		Callbacks()
-		{
-			engineInitListener.attach(controlThread().initialize, -90);
-			engineInitListener.bind<&engineInitialize>();
-			engineUpdateListener.attach(controlThread().update, 90);
-			engineUpdateListener.bind<&engineUpdate>();
-		}
-	} callbacksInstance;
+	}, -90);
 }

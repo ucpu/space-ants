@@ -28,12 +28,7 @@ namespace
 		"Laser Radius: ",
 	};
 
-	void engineUpdate()
-	{
-		// nothing
-	}
-
-	InputListener<InputClassEnum::GuiWidget, InputGuiWidget> guiListener;
+	EventListener<bool(const GenericInput &)> guiListener;
 
 	void guiEvent(InputGuiWidget in)
 	{
@@ -47,12 +42,11 @@ namespace
 		}
 	}
 
-	void engineInitialize()
-	{
+	const auto engineInitListener = controlThread().initialize.listen([]() {
 		Holder<GuiBuilder> g = newGuiBuilder(engineGuiEntities());
 
 		guiListener.attach(engineGuiManager()->widgetEvent);
-		guiListener.bind<&guiEvent>();
+		guiListener.bind(inputListener<InputClassEnum::GuiWidget, InputGuiWidget>(&guiEvent));
 
 		auto _1 = g->alignment(Vec2());
 		auto _2 = g->spoiler().text("Ships");
@@ -73,19 +67,5 @@ namespace
 			c.max.f = 10.0;
 			c.step.f = 0.1;
 		}
-	}
-
-	class Callbacks
-	{
-		EventListener<void()> engineInitListener;
-		EventListener<void()> engineUpdateListener;
-	public:
-		Callbacks()
-		{
-			engineInitListener.attach(controlThread().initialize);
-			engineInitListener.bind<&engineInitialize>();
-			engineUpdateListener.attach(controlThread().update);
-			engineUpdateListener.bind<&engineUpdate>();
-		}
-	} callbacksInitInstance;
+	});
 }

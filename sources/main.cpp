@@ -34,9 +34,7 @@ int main(int argc, const char *args[])
 		controlThread().updatePeriod(1000000 / 30);
 		engineAssets()->add(HashString("ants/ants.pack"));
 
-		InputListener<InputClassEnum::WindowClose, InputWindow> closeListener;
-		closeListener.attach(engineWindow()->events);
-		closeListener.bind<&windowClose>();
+		const auto closeListener = engineWindow()->events.listen(inputListener<InputClassEnum::WindowClose, InputWindow>([](auto) { engineStop(); }));
 		engineWindow()->title("space-ants");
 
 		{
@@ -44,7 +42,7 @@ int main(int argc, const char *args[])
 			Holder<StatisticsGui> engineStatistics = newStatisticsGui();
 			engineStatistics->statisticsScope = StatisticsGuiScopeEnum::None;
 
-			engineStart();
+			engineRun();
 		}
 
 		engineAssets()->remove(HashString("ants/ants.pack"));

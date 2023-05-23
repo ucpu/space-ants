@@ -26,8 +26,7 @@ namespace
 	constexpr uint32 batchScale = 10;
 #endif // CAGE_DEBUG
 
-	void engineInitialize()
-	{
+	const auto engineInitListener = controlThread().initialize.listen([]() {
 		uint32 playersCount = randomRange(2u, 5u);
 		std::vector<Vec3> playerColors;
 		playerColors.resize(playersCount);
@@ -54,7 +53,7 @@ namespace
 			PlanetComponent &planet = e->value<PlanetComponent>();
 			planet.batch = randomRange(3 * batchScale, 5 * batchScale);
 		}
-	}
+	}, -50);
 
 	void createShip(Entity *planet, uint32 target)
 	{
@@ -80,8 +79,7 @@ namespace
 
 	uint32 planetIndex = 0;
 
-	void engineUpdate()
-	{
+	const auto engineUpdateListener = controlThread().update.listen([]() {
 		ProfilingScope profiling("planets");
 		uint32 shipsCount = engineEntities()->component<ShipComponent>()->count();
 		uint32 planetsCount = engineEntities()->component<PlanetComponent>()->count();
@@ -100,19 +98,5 @@ namespace
 			p.batch = randomRange(3 * batchScale, 5 * batchScale);
 			planetIndex++;
 		}
-	}
-
-	class Callbacks
-	{
-		EventListener<void()> engineInitListener;
-		EventListener<void()> engineUpdateListener;
-	public:
-		Callbacks()
-		{
-			engineInitListener.attach(controlThread().initialize, -50);
-			engineInitListener.bind<&engineInitialize>();
-			engineUpdateListener.attach(controlThread().update, 60);
-			engineUpdateListener.bind<&engineUpdate>();
-		}
-	} callbacksInstance;
+	}, 60);
 }

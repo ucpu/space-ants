@@ -192,8 +192,7 @@ namespace
 		}
 	};
 
-	void engineUpdate()
-	{
+	const auto engineUpdateListener = controlThread().update.listen([]() {
 		ProfilingScope profilingTop("ships");
 		profilingTop.set(Stringizer() + "count: " + engineEntities()->component<ShipComponent>()->count());
 
@@ -218,7 +217,7 @@ namespace
 			ships.reserve(10000);
 			entitiesVisitor([&](Entity *e, TransformComponent &t, ShipComponent &s, OwnerComponent &owner, PhysicsComponent &phys, LifeComponent &life) {
 				ships.push_back({ e, t, s, owner, phys, life });
-			}, engineEntities(), false);
+				}, engineEntities(), false);
 			tasksRunBlocking<ShipUpdater, 32>("update ships", ships);
 			if (!ships.empty())
 				shipsInteractionRatio.add(1000 * uint64(ShipUpdater::shipsInteracted) / ships.size());
@@ -233,16 +232,5 @@ namespace
 			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
 			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships interaction ratio: " + Real(shipsInteractionRatio.smooth()) * 0.001);
 		}
-	}
-
-	class Callbacks
-	{
-		EventListener<void()> engineUpdateListener;
-	public:
-		Callbacks()
-		{
-			engineUpdateListener.attach(controlThread().update, 30);
-			engineUpdateListener.bind<&engineUpdate>();
-		}
-	} callbacksInstance;
+	}, 30);
 }
