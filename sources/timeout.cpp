@@ -1,7 +1,7 @@
 #include "common.h"
 
-#include <cage-core/hashString.h>
 #include <cage-core/color.h>
+#include <cage-core/hashString.h>
 
 EntityGroup *entitiesToDestroy;
 
@@ -45,35 +45,36 @@ namespace
 		}
 	}
 
-	const auto engineUpdateListener = controlThread().update.listen([]() {
+	const auto engineUpdateListener = controlThread().update.listen(
+		[]()
 		{
-			ProfilingScope profiling("timeout");
-			for (Entity *e : engineEntities()->component<TimeoutComponent>()->entities())
 			{
-				TimeoutComponent &t = e->value<TimeoutComponent>();
-				if (t.ttl-- <= 0)
-					e->add(entitiesToDestroy);
-			}
-		}
-		{
-			ProfilingScope profiling("explosions");
-			for (Entity *e : engineEntities()->component<LifeComponent>()->entities())
-			{
-				LifeComponent &l = e->value<LifeComponent>();
-				if (l.life <= 0)
+				ProfilingScope profiling("timeout");
+				for (Entity *e : engineEntities()->component<TimeoutComponent>()->entities())
 				{
-					e->add(entitiesToDestroy);
-					if (e->has<ShipComponent>())
-						shipExplode(e);
+					TimeoutComponent &t = e->value<TimeoutComponent>();
+					if (t.ttl-- <= 0)
+						e->add(entitiesToDestroy);
 				}
 			}
-		}
-		{
-			entitiesToDestroy->destroy();
-		}
-	}, 90);
+			{
+				ProfilingScope profiling("explosions");
+				for (Entity *e : engineEntities()->component<LifeComponent>()->entities())
+				{
+					LifeComponent &l = e->value<LifeComponent>();
+					if (l.life <= 0)
+					{
+						e->add(entitiesToDestroy);
+						if (e->has<ShipComponent>())
+							shipExplode(e);
+					}
+				}
+			}
+			{
+				entitiesToDestroy->destroy();
+			}
+		},
+		90);
 
-	const auto engineInitListener = controlThread().initialize.listen([]() {
-		entitiesToDestroy = engineEntities()->defineGroup();
-	}, -90);
+	const auto engineInitListener = controlThread().initialize.listen([]() { entitiesToDestroy = engineEntities()->defineGroup(); }, -90);
 }

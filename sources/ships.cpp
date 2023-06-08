@@ -1,19 +1,19 @@
 #include "common.h"
 
-#include <cage-core/random.h>
-#include <cage-core/geometry.h>
-#include <cage-core/spatialStructure.h>
-#include <cage-core/entitiesVisitor.h>
 #include <cage-core/concurrent.h>
+#include <cage-core/entitiesVisitor.h>
+#include <cage-core/geometry.h>
 #include <cage-core/hashString.h>
+#include <cage-core/random.h>
+#include <cage-core/spatialStructure.h>
+#include <cage-core/tasks.h>
 #include <cage-core/timer.h>
 #include <cage-core/variableSmoothingBuffer.h>
-#include <cage-core/tasks.h>
 
-#include <random>
-#include <vector>
 #include <algorithm>
 #include <atomic>
+#include <random>
+#include <vector>
 
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
@@ -58,12 +58,9 @@ namespace
 		static inline Holder<Mutex> mutex = newMutex();
 		static inline std::atomic<uint32> shipsInteracted = 0;
 
-		static Vec3 front(const Transform &t)
-		{
-			return t.position + t.orientation * Vec3(0, 0, -1) * t.scale;
-		}
+		static Vec3 front(const Transform &t) { return t.position + t.orientation * Vec3(0, 0, -1) * t.scale; }
 
-		void operator () ()
+		void operator()()
 		{
 			thread_local Holder<SpatialQuery> spatialQuery = newSpatialQuery(spatialSearchData.share());
 
@@ -192,45 +189,49 @@ namespace
 		}
 	};
 
-	const auto engineUpdateListener = controlThread().update.listen([]() {
-		ProfilingScope profilingTop("ships");
-		profilingTop.set(Stringizer() + "count: " + engineEntities()->component<ShipComponent>()->count());
-
-		// add all physics objects into spatial data
-		clock->reset();
+	const auto engineUpdateListener = controlThread().update.listen(
+		[]()
 		{
-			ProfilingScope profiling("spatial data");
-			spatialSearchData->clear();
-			entitiesVisitor([&](Entity *e, const PhysicsComponent &, const TransformComponent &t) {
-				if (e->name())
-					spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
-				}, engineEntities(), false);
-			spatialSearchData->rebuild();
-		}
-		smoothTimeSpatialBuild.add(clock->elapsed());
+			ProfilingScope profilingTop("ships");
+			profilingTop.set(Stringizer() + "count: " + engineEntities()->component<ShipComponent>()->count());
 
-		// update ships
-		clock->reset();
-		{
-			ProfilingScope profiling("update");
-			std::vector<ShipUpdater> ships;
-			ships.reserve(10000);
-			entitiesVisitor([&](Entity *e, TransformComponent &t, ShipComponent &s, OwnerComponent &owner, PhysicsComponent &phys, LifeComponent &life) {
-				ships.push_back({ e, t, s, owner, phys, life });
-				}, engineEntities(), false);
-			tasksRunBlocking<ShipUpdater, 32>("update ships", ships);
-			if (!ships.empty())
-				shipsInteractionRatio.add(1000 * uint64(ShipUpdater::shipsInteracted) / ships.size());
-			ShipUpdater::shipsInteracted = 0;
-		}
-		smoothTimeShipsUpdate.add(clock->elapsed());
+			// add all physics objects into spatial data
+			clock->reset();
+			{
+				ProfilingScope profiling("spatial data");
+				spatialSearchData->clear();
+				entitiesVisitor(
+					[&](Entity *e, const PhysicsComponent &, const TransformComponent &t)
+					{
+						if (e->name())
+							spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
+					},
+					engineEntities(), false);
+				spatialSearchData->rebuild();
+			}
+			smoothTimeSpatialBuild.add(clock->elapsed());
 
-		// log timing
-		if (tickIndex++ % 120 == 0)
-		{
-			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
-			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
-			CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships interaction ratio: " + Real(shipsInteractionRatio.smooth()) * 0.001);
-		}
-	}, 30);
+			// update ships
+			clock->reset();
+			{
+				ProfilingScope profiling("update");
+				std::vector<ShipUpdater> ships;
+				ships.reserve(10000);
+				entitiesVisitor([&](Entity *e, TransformComponent &t, ShipComponent &s, OwnerComponent &owner, PhysicsComponent &phys, LifeComponent &life) { ships.push_back({ e, t, s, owner, phys, life }); }, engineEntities(), false);
+				tasksRunBlocking<ShipUpdater, 32>("update ships", ships);
+				if (!ships.empty())
+					shipsInteractionRatio.add(1000 * uint64(ShipUpdater::shipsInteracted) / ships.size());
+				ShipUpdater::shipsInteracted = 0;
+			}
+			smoothTimeShipsUpdate.add(clock->elapsed());
+
+			// log timing
+			if (tickIndex++ % 120 == 0)
+			{
+				CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Spatial prepare time: " + smoothTimeSpatialBuild.smooth() + " us");
+				CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships update time: " + smoothTimeShipsUpdate.smooth() + " us");
+				CAGE_LOG(SeverityEnum::Info, "performance", Stringizer() + "Ships interaction ratio: " + Real(shipsInteractionRatio.smooth()) * 0.001);
+			}
+		},
+		30);
 }

@@ -2,9 +2,9 @@
 
 #include <cage-core/hashString.h>
 #include <cage-core/variableSmoothingBuffer.h>
-#include <cage-simple/fpsCamera.h>
-#include <cage-engine/window.h>
 #include <cage-engine/sceneScreenSpaceEffects.h>
+#include <cage-engine/window.h>
+#include <cage-simple/fpsCamera.h>
 
 namespace
 {
@@ -82,37 +82,38 @@ namespace
 		}
 	}
 
-	const auto engineInitListener = controlThread().initialize.listen([]() {
-		camera = engineEntities()->createUnique();
+	const auto engineInitListener = controlThread().initialize.listen(
+		[]()
 		{
-			camera->value<TransformComponent>().position = Vec3(0, 0, 200);
-			CameraComponent &c = camera->value<CameraComponent>();
-			c.near = 1;
-			c.far = 500;
-			c.ambientColor = Vec3(1);
-			c.ambientIntensity = 0.1;
-			LightComponent &l = camera->value<LightComponent>();
-			l.lightType = LightTypeEnum::Directional;
-			l.color = Vec3(1);
-			l.intensity = 3;
-			l.ssaoFactor = 1;
-			camera->value<ScreenSpaceEffectsComponent>().effects = ScreenSpaceEffectsFlags::Default & ~ScreenSpaceEffectsFlags::AmbientOcclusion;
-			camera->value<ListenerComponent>();
-		}
-		{
-			Entity *skybox = engineEntities()->createUnique();
-			skybox->value<TransformComponent>();
-			skybox->value<RenderComponent>().object = HashString("ants/skybox/skybox.object");
-		}
-		manualCamera = newFpsCamera(camera);
-		manualCamera->freeMove = true;
-		manualCamera->mouseButton = MouseButtonsFlags::Left;
-		manualCamera->movementSpeed = 3;
-		keyPressListener.attach(engineWindow()->events);
-		keyPressListener.bind(inputListener<InputClassEnum::KeyPress, InputKey>(&keyPress));
-	}, -200);
+			camera = engineEntities()->createUnique();
+			{
+				camera->value<TransformComponent>().position = Vec3(0, 0, 200);
+				CameraComponent &c = camera->value<CameraComponent>();
+				c.near = 1;
+				c.far = 500;
+				c.ambientColor = Vec3(1);
+				c.ambientIntensity = 0.1;
+				LightComponent &l = camera->value<LightComponent>();
+				l.lightType = LightTypeEnum::Directional;
+				l.color = Vec3(1);
+				l.intensity = 3;
+				l.ssaoFactor = 1;
+				camera->value<ScreenSpaceEffectsComponent>().effects = ScreenSpaceEffectsFlags::Default & ~ScreenSpaceEffectsFlags::AmbientOcclusion;
+				camera->value<ListenerComponent>();
+			}
+			{
+				Entity *skybox = engineEntities()->createUnique();
+				skybox->value<TransformComponent>();
+				skybox->value<RenderComponent>().object = HashString("ants/skybox/skybox.object");
+			}
+			manualCamera = newFpsCamera(camera);
+			manualCamera->freeMove = true;
+			manualCamera->mouseButton = MouseButtonsFlags::Left;
+			manualCamera->movementSpeed = 3;
+			keyPressListener.attach(engineWindow()->events);
+			keyPressListener.bind(inputListener<InputClassEnum::KeyPress, InputKey>(&keyPress));
+		},
+		-200);
 
-	const auto engineUpdateListener = controlThread().update.listen([]() {
-		autoCamera.update();
-	}, 200);
+	const auto engineUpdateListener = controlThread().update.listen([]() { autoCamera.update(); }, 200);
 }
