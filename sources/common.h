@@ -2,6 +2,7 @@
 #define ants_common_h_sdg456ds4hg6
 
 #include <cage-core/entities.h>
+#include <cage-core/entitiesVisitor.h>
 #include <cage-core/math.h>
 #include <cage-core/profiling.h>
 #include <cage-engine/scene.h>
@@ -45,7 +46,8 @@ struct TimeoutComponent
 	sint32 ttl = 1;
 };
 
-extern EntityGroup *entitiesToDestroy;
+struct DestroyingComponent
+{};
 
 uint32 pickTargetPlanet(uint32 shipOwner);
 

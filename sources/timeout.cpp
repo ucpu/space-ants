@@ -3,8 +3,6 @@
 #include <cage-core/color.h>
 #include <cage-core/hashString.h>
 
-EntityGroup *entitiesToDestroy;
-
 namespace
 {
 	Vec3 colorVariation(const Vec3 &c)
@@ -49,32 +47,28 @@ namespace
 		[]()
 		{
 			{
-				ProfilingScope profiling("timeout");
+				const ProfilingScope profiling("timeout");
 				for (Entity *e : engineEntities()->component<TimeoutComponent>()->entities())
 				{
 					TimeoutComponent &t = e->value<TimeoutComponent>();
 					if (t.ttl-- <= 0)
-						e->add(entitiesToDestroy);
+						e->value<DestroyingComponent>();
 				}
 			}
 			{
-				ProfilingScope profiling("explosions");
+				const ProfilingScope profiling("explosions");
 				for (Entity *e : engineEntities()->component<LifeComponent>()->entities())
 				{
 					LifeComponent &l = e->value<LifeComponent>();
 					if (l.life <= 0)
 					{
-						e->add(entitiesToDestroy);
+						e->value<DestroyingComponent>();
 						if (e->has<ShipComponent>())
 							shipExplode(e);
 					}
 				}
 			}
-			{
-				entitiesToDestroy->destroy();
-			}
+			engineEntities()->component<DestroyingComponent>()->destroy();
 		},
 		90);
-
-	const auto engineInitListener = controlThread().initialize.listen([]() { entitiesToDestroy = engineEntities()->defineGroup(); }, -90);
 }

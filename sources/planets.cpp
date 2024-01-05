@@ -85,7 +85,7 @@ namespace
 	const auto engineUpdateListener = controlThread().update.listen(
 		[]()
 		{
-			ProfilingScope profiling("planets");
+			const ProfilingScope profiling("planets");
 			uint32 shipsCount = engineEntities()->component<ShipComponent>()->count();
 			uint32 planetsCount = engineEntities()->component<PlanetComponent>()->count();
 			uint32 currentIndex = 0;

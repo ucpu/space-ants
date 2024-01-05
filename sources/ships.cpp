@@ -1,7 +1,6 @@
 #include "common.h"
 
 #include <cage-core/concurrent.h>
-#include <cage-core/entitiesVisitor.h>
 #include <cage-core/geometry.h>
 #include <cage-core/hashString.h>
 #include <cage-core/random.h>
@@ -198,7 +197,7 @@ namespace
 			// add all physics objects into spatial data
 			clock->reset();
 			{
-				ProfilingScope profiling("spatial data");
+				const ProfilingScope profiling("spatial data");
 				spatialSearchData->clear();
 				entitiesVisitor(
 					[&](Entity *e, const PhysicsComponent &, const TransformComponent &t)
@@ -214,7 +213,7 @@ namespace
 			// update ships
 			clock->reset();
 			{
-				ProfilingScope profiling("update");
+				const ProfilingScope profiling("update");
 				std::vector<ShipUpdater> ships;
 				ships.reserve(10000);
 				entitiesVisitor([&](Entity *e, TransformComponent &t, ShipComponent &s, OwnerComponent &owner, PhysicsComponent &phys, LifeComponent &life) { ships.push_back({ e, t, s, owner, phys, life }); }, engineEntities(), false);

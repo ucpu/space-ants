@@ -11,6 +11,7 @@ namespace
 			engineEntities()->defineComponent(ShipComponent());
 			engineEntities()->defineComponent(PlanetComponent());
 			engineEntities()->defineComponent(TimeoutComponent());
+			engineEntities()->defineComponent(DestroyingComponent());
 		},
-		-100);
+		-1000);
 }
