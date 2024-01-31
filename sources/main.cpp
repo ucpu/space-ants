@@ -13,14 +13,6 @@
 
 using namespace cage;
 
-namespace
-{
-	void windowClose(InputWindow)
-	{
-		engineStop();
-	}
-}
-
 int main(int argc, const char *args[])
 {
 	try
@@ -34,7 +26,7 @@ int main(int argc, const char *args[])
 		controlThread().updatePeriod(1000000 / 30);
 		engineAssets()->add(HashString("ants/ants.pack"));
 
-		const auto closeListener = engineWindow()->events.listen(inputListener<InputClassEnum::WindowClose, InputWindow>([](auto) { engineStop(); }));
+		const auto closeListener = engineWindow()->events.listen(inputFilter([](input::WindowClose) { engineStop(); }));
 		engineWindow()->title("space-ants");
 
 		{

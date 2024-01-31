@@ -30,13 +30,12 @@ namespace
 
 	EventListener<bool(const GenericInput &)> guiListener;
 
-	void guiEvent(InputGuiWidget in)
+	void guiEvent(input::GuiValue in)
 	{
-		uint32 index = in.widget - 20;
-		if (index < sizeof(propertyValues) / sizeof(propertyValues[0]))
+		const uint32 index = in.entity->name() - 20;
+		if (index < array_size(propertyValues))
 		{
-			Entity *e = engineGuiEntities()->get(in.widget);
-			GuiInputComponent &input = e->value<GuiInputComponent>();
+			GuiInputComponent &input = in.entity->value<GuiInputComponent>();
 			if (input.valid)
 				*propertyValues[index] = toFloat(input.value);
 		}
@@ -48,7 +47,7 @@ namespace
 			Holder<GuiBuilder> g = newGuiBuilder(engineGuiEntities());
 
 			guiListener.attach(engineGuiManager()->widgetEvent);
-			guiListener.bind(inputListener<InputClassEnum::GuiWidget, InputGuiWidget>(&guiEvent));
+			guiListener.bind(inputFilter(guiEvent));
 
 			auto _1 = g->alignment(Vec2());
 			auto _2 = g->spoiler().text("Ships");

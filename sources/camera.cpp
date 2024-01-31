@@ -57,9 +57,8 @@ namespace
 	Entity *camera;
 	Holder<FpsCamera> manualCamera;
 	AutoCamera autoCamera;
-	EventListener<bool(const GenericInput &)> keyPressListener;
 
-	void keyPress(InputKey in)
+	void keyPress(input::KeyPress in)
 	{
 		if (in.key == 32)
 		{
@@ -81,6 +80,8 @@ namespace
 			}
 		}
 	}
+
+	EventListener<bool(const GenericInput &)> keyPressListener = engineEvents().listen(inputFilter(keyPress));
 
 	const auto engineInitListener = controlThread().initialize.listen(
 		[]()
@@ -110,8 +111,6 @@ namespace
 			manualCamera->freeMove = true;
 			manualCamera->mouseButton = MouseButtonsFlags::Left;
 			manualCamera->movementSpeed = 3;
-			keyPressListener.attach(engineWindow()->events);
-			keyPressListener.bind(inputListener<InputClassEnum::KeyPress, InputKey>(&keyPress));
 		},
 		-200);
 
