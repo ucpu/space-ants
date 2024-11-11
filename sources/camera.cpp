@@ -1,10 +1,10 @@
-#include "common.h"
-
 #include <cage-core/hashString.h>
 #include <cage-core/variableSmoothingBuffer.h>
 #include <cage-engine/sceneScreenSpaceEffects.h>
 #include <cage-engine/window.h>
 #include <cage-simple/fpsCamera.h>
+
+#include "common.h"
 
 namespace
 {
@@ -15,7 +15,7 @@ namespace
 
 		void updatePositions()
 		{
-			if (engineEntities()->has(shipName))
+			if (engineEntities()->exists(shipName))
 			{
 				Entity *ship = engineEntities()->get(shipName);
 				TransformComponent &t = ship->value<TransformComponent>();
@@ -28,7 +28,7 @@ namespace
 			{
 				uint32 cnt = engineEntities()->component<ShipComponent>()->count();
 				uint32 i = randomRange(0u, cnt);
-				shipName = engineEntities()->component<ShipComponent>()->entities()[i]->name();
+				shipName = engineEntities()->component<ShipComponent>()->entities()[i]->id();
 			}
 		}
 

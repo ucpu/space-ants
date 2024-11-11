@@ -1,10 +1,10 @@
-#include "common.h"
+#include <initializer_list>
 
 #include <cage-core/string.h>
 #include <cage-engine/guiBuilder.h>
 #include <cage-engine/guiManager.h>
 
-#include <initializer_list>
+#include "common.h"
 
 namespace
 {
@@ -32,7 +32,7 @@ namespace
 
 	void guiEvent(input::GuiValue in)
 	{
-		const uint32 index = in.entity->name() - 20;
+		const uint32 index = in.entity->id() - 20;
 		if (index < array_size(propertyValues))
 		{
 			GuiInputComponent &input = in.entity->value<GuiInputComponent>();

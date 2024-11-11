@@ -1,4 +1,7 @@
-#include "common.h"
+#include <algorithm>
+#include <atomic>
+#include <random>
+#include <vector>
 
 #include <cage-core/concurrent.h>
 #include <cage-core/geometry.h>
@@ -9,10 +12,7 @@
 #include <cage-core/timer.h>
 #include <cage-core/variableSmoothingBuffer.h>
 
-#include <algorithm>
-#include <atomic>
-#include <random>
-#include <vector>
+#include "common.h"
 
 uint32 pickTargetPlanet(uint32 shipOwner)
 {
@@ -22,7 +22,7 @@ uint32 pickTargetPlanet(uint32 shipOwner)
 	for (Entity *e : planets)
 	{
 		if (e->value<OwnerComponent>().owner != shipOwner)
-			return e->name();
+			return e->id();
 	}
 	return 0;
 }
@@ -73,7 +73,7 @@ namespace
 			// find all nearby objects
 			spatialQuery->intersection(Sphere(t.position, t.scale + shipDetectRadius));
 			shipsInteracted += numeric_cast<uint32>(spatialQuery->result().size());
-			const uint32 myName = e->name();
+			const uint32 myName = e->id();
 			Vec3 avgPos;
 			Vec3 avgDir;
 			uint32 avgCnt = 0;
@@ -129,20 +129,20 @@ namespace
 
 			// choose a target to follow
 			uint32 targetName = 0;
-			if (engineEntities()->has(s.currentTarget))
+			if (engineEntities()->exists(s.currentTarget))
 				targetName = s.currentTarget;
 			else if (closestTargetName)
 				targetName = s.currentTarget = closestTargetName;
 			else
 			{
 				// use long-term goal
-				if (!engineEntities()->has(s.longtermTarget))
+				if (!engineEntities()->exists(s.longtermTarget))
 					s.longtermTarget = pickTargetPlanet(owner.owner);
 				targetName = s.longtermTarget;
 			}
 
 			// accelerate towards target
-			if (engineEntities()->has(targetName))
+			if (engineEntities()->exists(targetName))
 			{
 				Entity *target = engineEntities()->get(targetName);
 				const TransformComponent &targetTransform = target->value<TransformComponent>();
@@ -153,7 +153,7 @@ namespace
 			}
 
 			// fire at closest enemy
-			if (engineEntities()->has(closestTargetName))
+			if (engineEntities()->exists(closestTargetName))
 			{
 				Entity *target = engineEntities()->get(closestTargetName);
 				const TransformComponent &tt = target->value<TransformComponent>();
@@ -202,8 +202,8 @@ namespace
 				entitiesVisitor(
 					[&](Entity *e, const PhysicsComponent &, const TransformComponent &t)
 					{
-						if (e->name())
-							spatialSearchData->update(e->name(), Sphere(t.position, t.scale));
+						if (e->id())
+							spatialSearchData->update(e->id(), Sphere(t.position, t.scale));
 					},
 					engineEntities(), false);
 				spatialSearchData->rebuild();

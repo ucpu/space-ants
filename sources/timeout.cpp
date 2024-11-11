@@ -1,7 +1,7 @@
-#include "common.h"
-
 #include <cage-core/color.h>
 #include <cage-core/hashString.h>
+
+#include "common.h"
 
 namespace
 {
@@ -36,10 +36,8 @@ namespace
 			TextureAnimationComponent &at = e->value<TextureAnimationComponent>();
 			at.startTime = engineControlTime();
 			at.speed = randomRange(0.7, 1.5);
-			PhysicsComponent &p = e->value<PhysicsComponent>();
-			p.velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
-			TimeoutComponent &ttl = e->value<TimeoutComponent>();
-			ttl.ttl = numeric_cast<sint32>(Real(30) / at.speed);
+			e->value<PhysicsComponent>().velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
+			e->value<TimeoutComponent>().ttl = numeric_cast<sint32>(Real(30) / at.speed);
 		}
 	}
 

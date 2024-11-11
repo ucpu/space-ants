@@ -1,14 +1,14 @@
 #ifndef ants_common_h_sdg456ds4hg6
 #define ants_common_h_sdg456ds4hg6
 
+//#include <atomic>
+
 #include <cage-core/entities.h>
 #include <cage-core/entitiesVisitor.h>
 #include <cage-core/math.h>
 #include <cage-core/profiling.h>
 #include <cage-engine/scene.h>
 #include <cage-simple/engine.h>
-
-#include <atomic>
 
 using namespace cage;
 

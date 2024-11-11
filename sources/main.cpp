@@ -1,10 +1,6 @@
-#include <cage-core/assetManager.h>
-#include <cage-core/config.h>
+#include <cage-core/assetsManager.h>
 #include <cage-core/hashString.h>
-#include <cage-core/ini.h>
 #include <cage-core/logger.h>
-#include <cage-core/math.h>
-
 #include <cage-engine/highPerformanceGpuHint.h>
 #include <cage-engine/window.h>
 #include <cage-simple/engine.h>
@@ -17,14 +13,10 @@ int main(int argc, const char *args[])
 {
 	try
 	{
-		Holder<Logger> log1 = newLogger();
-		log1->format.bind<logFormatConsole>();
-		log1->output.bind<logOutputStdOut>();
-
-		configSetBool("cage/config/autoSave", true);
+		initializeConsoleLogger();
 		engineInitialize(EngineCreateConfig());
-		controlThread().updatePeriod(1000000 / 30);
-		engineAssets()->add(HashString("ants/ants.pack"));
+		controlThread().updatePeriod(1'000'000 / 30);
+		engineAssets()->load(HashString("ants/ants.pack"));
 
 		const auto closeListener = engineWindow()->events.listen(inputFilter([](input::WindowClose) { engineStop(); }));
 		engineWindow()->title("space-ants");
@@ -32,12 +24,11 @@ int main(int argc, const char *args[])
 		{
 			Holder<FullscreenSwitcher> fullscreen = newFullscreenSwitcher({});
 			Holder<StatisticsGui> engineStatistics = newStatisticsGui();
-			engineStatistics->statisticsScope = StatisticsGuiScopeEnum::None;
 
 			engineRun();
 		}
 
-		engineAssets()->remove(HashString("ants/ants.pack"));
+		engineAssets()->unload(HashString("ants/ants.pack"));
 		engineFinalize();
 		return 0;
 	}
