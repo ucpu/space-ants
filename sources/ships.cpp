@@ -171,9 +171,8 @@ namespace
 					tr.position = o;
 					tr.orientation = Quat(d, Vec3(0, 1, 0));
 					tr.scale = l;
-					RenderComponent &r = laser->value<RenderComponent>();
-					r.object = HashString("ants/laser/laser.obj");
-					r.color = e->value<RenderComponent>().color;
+					laser->value<ModelComponent>().model = HashString("ants/laser/laser.obj");
+					laser->value<ColorComponent>().color = e->value<ColorComponent>().color;
 					laser->value<TimeoutComponent>().ttl = 1;
 				}
 			}

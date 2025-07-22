@@ -89,23 +89,30 @@ namespace
 			camera = engineEntities()->createUnique();
 			{
 				camera->value<TransformComponent>().position = Vec3(0, 0, 200);
-				CameraComponent &c = camera->value<CameraComponent>();
-				c.near = 1;
-				c.far = 500;
-				c.ambientColor = Vec3(1);
-				c.ambientIntensity = 0.1;
-				LightComponent &l = camera->value<LightComponent>();
-				l.lightType = LightTypeEnum::Directional;
-				l.color = Vec3(1);
-				l.intensity = 3;
-				l.ssaoFactor = 1;
+				{
+					CameraComponent &c = camera->value<CameraComponent>();
+					c.near = 1;
+					c.far = 500;
+					c.ambientColor = Vec3(1);
+					c.ambientIntensity = 0.1;
+				}
+				{
+					LightComponent &l = camera->value<LightComponent>();
+					l.lightType = LightTypeEnum::Directional;
+					l.ssaoFactor = 1;
+				}
+				{
+					ColorComponent &c = camera->value<ColorComponent>();
+					c.color = Vec3(1);
+					c.intensity = 3;
+				}
 				camera->value<ScreenSpaceEffectsComponent>().effects = ScreenSpaceEffectsFlags::Default & ~ScreenSpaceEffectsFlags::AmbientOcclusion;
 				camera->value<ListenerComponent>();
 			}
 			{
 				Entity *skybox = engineEntities()->createUnique();
 				skybox->value<TransformComponent>();
-				skybox->value<RenderComponent>().object = HashString("ants/skybox/skybox.object");
+				skybox->value<ModelComponent>().model = HashString("ants/skybox/skybox.object");
 			}
 			manualCamera = newFpsCamera(camera);
 			manualCamera->freeMove = true;

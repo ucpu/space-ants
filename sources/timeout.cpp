@@ -18,9 +18,10 @@ namespace
 
 	void shipExplode(Entity *ship)
 	{
-		TransformComponent &st = ship->value<TransformComponent>();
-		RenderComponent &sr = ship->value<RenderComponent>();
-		PhysicsComponent &sp = ship->value<PhysicsComponent>();
+		const TransformComponent &st = ship->value<TransformComponent>();
+		const ModelComponent &sr = ship->value<ModelComponent>();
+		const ColorComponent &sc = ship->value<ColorComponent>();
+		const PhysicsComponent &sp = ship->value<PhysicsComponent>();
 		uint32 cnt = randomRange(4, 7);
 		for (uint32 i = 0; i < cnt; i++)
 		{
@@ -29,12 +30,12 @@ namespace
 			t.scale = st.scale;
 			t.position = st.position + randomDirection3() * st.scale;
 			t.orientation = randomDirectionQuat();
-			RenderComponent &r = e->value<RenderComponent>();
-			r.object = HashString("ants/explosion/particle.blend");
-			r.color = colorVariation(sr.color);
-			r.intensity = 2;
-			TextureAnimationComponent &at = e->value<TextureAnimationComponent>();
-			at.startTime = engineControlTime();
+			ModelComponent &r = e->value<ModelComponent>();
+			r.model = HashString("ants/explosion/particle.blend");
+			ColorComponent &c = e->value<ColorComponent>();
+			c.color = colorVariation(sc.color);
+			c.intensity = 2;
+			AnimationSpeedComponent &at = e->value<AnimationSpeedComponent>();
 			at.speed = randomRange(0.7, 1.5);
 			e->value<PhysicsComponent>().velocity = randomDirection3() * t.scale * 0.07 + sp.velocity;
 			e->value<TimeoutComponent>().ttl = numeric_cast<sint32>(Real(30) / at.speed);

@@ -45,9 +45,8 @@ namespace
 				t.scale = 5;
 				OwnerComponent &owner = e->value<OwnerComponent>();
 				owner.owner = p % playersCount;
-				RenderComponent &r = e->value<RenderComponent>();
-				r.object = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
-				r.color = playerColors[owner.owner];
+				e->value<ModelComponent>().model = modelNames[randomRange(0u, (uint32)(sizeof(modelNames) / sizeof(modelNames[0])))];
+				e->value<ColorComponent>().color = playerColors[owner.owner];
 				e->value<PhysicsComponent>().rotation = interpolate(Quat(), randomDirectionQuat(), 0.0003);
 				e->value<LifeComponent>().life = randomRange(1000000, 2000000);
 				e->value<PlanetComponent>().batch = randomRange(3 * batchScale, 5 * batchScale);
@@ -64,9 +63,8 @@ namespace
 		t.position = planetTransform.position + randomDirection3() * (t.scale + planetTransform.scale + 1e-5);
 		t.orientation = randomDirectionQuat();
 		e->value<OwnerComponent>().owner = planet->value<OwnerComponent>().owner;
-		RenderComponent &r = e->value<RenderComponent>();
-		r.color = planet->value<RenderComponent>().color;
-		r.object = HashString("ants/ships/1/1.object");
+		e->value<ModelComponent>().model = HashString("ants/ships/1/1.object");
+		e->value<ColorComponent>().color = planet->value<ColorComponent>().color;
 		e->value<PhysicsComponent>();
 		e->value<LifeComponent>().life = randomRange(200, 300);
 		e->value<ShipComponent>().longtermTarget = target;

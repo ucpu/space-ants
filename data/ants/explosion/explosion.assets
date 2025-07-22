@@ -2,14 +2,12 @@
 []
 scheme = model
 normals = false
-
 scale = 2
 particle.blend
 
 []
 scheme = texture
 target = 2dArray
-animationLoop = false
 srgb = true
 particle/burn_$$.png
 
